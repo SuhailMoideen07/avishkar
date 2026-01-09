@@ -1,12 +1,28 @@
 'use client'
 import { GridScan } from '@/components/GridScan';
+import Shuffle from '@/components/Shuffle';
+import StaggeredMenu from '@/components/StaggeredMenu';
+import { pressStart2P } from '@/lib/fonts';
+import Image from 'next/image';
+
+
+const menuItems = [
+  { label: 'Home', ariaLabel: 'Go to home page', link: '/' },
+  { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
+  { label: 'Services', ariaLabel: 'View our services', link: '/services' },
+  { label: 'Contact', ariaLabel: 'Get in touch', link: '/contact' }
+];
+
+const socialItems = [
+  { label: 'Instagram', link: 'https://instagram.com' },
+];
 
 export default function Home() {
   return (
-    <section className='relative text-neutral-600'>
+    <section className='relative text-[#FED700] w-screen'>
       <div className='w-full h-screen fixed -z-10 top-0 left-0 bg-black' >
         <GridScan
-          sensitivity={0.55}
+          sensitivity={0.75}
           lineThickness={1}
           linesColor="#FFF800"
           gridScale={0.15}
@@ -22,8 +38,75 @@ export default function Home() {
           enableWebcam={false}
         />
       </div>
-      <div className="h-screen">
-        hero content
+      {/* <div className='h-[100vh]'>
+        <StaggeredMenu
+          position="right"
+          items={menuItems}
+          socialItems={socialItems}
+          displaySocials={true}
+          displayItemNumbering={true}
+          menuButtonColor="#fff"
+          openMenuButtonColor="#000000"
+          changeMenuColorOnOpen={true}
+          colors={['#FFFFE0', '#FFF800']}
+          logoUrl="/path-to-your-logo.svg"
+          accentColor="#FFF800"
+          onMenuOpen={() => console.log('Menu opened')}
+          onMenuClose={() => console.log('Menu closed')}
+        />
+      </div> */}
+      <div className="relative h-screen flex justify-center items-center overflow-hidden">
+        <Image
+          src='/images/star.svg'
+          alt='star1'
+          width={60}
+          height={60}
+          className='absolute top-40 right-10'
+        />
+        <Image
+          src='/images/star.svg'
+          alt='star2'
+          width={100}
+          height={100}
+          className='absolute top-3/5 -right-10'
+        />
+        <Image
+          src='/images/star.svg'
+          alt='star3'
+          width={180}
+          height={180}
+          className='absolute top-2/6 -left-32 -translate-y-1/2 rotate-45'
+        />
+        <Image
+          src='/images/star.svg'
+          alt='star4'
+          width={50}
+          height={50}
+          className='absolute bottom-32 right-20 rotate-90'
+        />
+        <Image
+          src='/images/star.svg'
+          alt='star5'
+          width={120}
+          height={120}
+          className='absolute bottom-40 left-10 -rotate-12'
+        />
+        <Shuffle
+          className={`${pressStart2P.className} `}
+          text="Avishkar 2026"
+          shuffleDirection="right"
+          duration={0.45}
+          animationMode="evenodd"
+          shuffleTimes={1}
+          ease="power3.out"
+          stagger={0.03}
+          threshold={0.1}
+          triggerOnce={true}
+          triggerOnHover={true}
+          respectReducedMotion={true}
+          loop
+          loopDelay={3}
+        />
       </div>
       <div className="h-screen">
         cultural
