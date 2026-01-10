@@ -63,6 +63,8 @@ export default function Home() {
     images.forEach((img, index) => {
       const ribbon = ribbons[index];
       const isEven = index % 2 === 0;
+      const isVertical = index === 1;
+
       // Initial state: Off-screen bottom, full size
       gsap.set(img, {
         yPercent: 100,
@@ -70,9 +72,15 @@ export default function Home() {
         opacity: 1,
         filter: "blur(0px) brightness(1)"
       });
-      gsap.set(ribbon, {
-        xPercent: isEven ? 150 : -150
-      });
+      if (isVertical) {
+        gsap.set(ribbon, {
+          yPercent: 150
+        });
+      } else {
+        gsap.set(ribbon, {
+          xPercent: isEven ? 150 : -150
+        });
+      }
 
 
       // 1. Slide In to Center from bottom
@@ -82,11 +90,19 @@ export default function Home() {
         ease: "power2.out"
       }, index === 0 ? 0 : "-=0.5");
 
-      tl.to(ribbon, {
-        xPercent: isEven ? -150 : 150, // Continuous slide across the screen
-        duration: 2.5,
-        ease: "none"
-      }, index === 0 ? 0 : "-=1.2");
+      if (isVertical) {
+        tl.to(ribbon, {
+          yPercent: -150,
+          duration: 2.5,
+          ease: "none"
+        }, index === 0 ? 0 : "-=1.2");
+      } else {
+        tl.to(ribbon, {
+          xPercent: isEven ? -150 : 150,
+          duration: 2.5,
+          ease: "none"
+        }, index === 0 ? 0 : "-=1.2");
+      }
 
       // 2. Recede into Depth (shrink, move up slightly, fade and blur)
       if (index < images.length) {
@@ -122,7 +138,7 @@ export default function Home() {
           enableWebcam={false}
         />
       </div>
-      <div className='h-[100dvh] fixed inset-0 z-20 '>
+      <div className='h-[100svh] fixed inset-0 z-20 '>
         <StaggeredMenu
           position="right"
           items={menuItems}
@@ -139,7 +155,7 @@ export default function Home() {
           onMenuClose={() => console.log('Menu closed')}
         />
       </div>
-      <div className="relative h-screen flex justify-center items-center overflow-hidden">
+      <div className="relative h-[100svh] flex justify-center items-center overflow-hidden">
         {/* Star 1 */}
         <Image
           ref={el => (starsRef.current[0] = el)}
@@ -223,17 +239,22 @@ export default function Home() {
       {/* Cinematic Image Sequence Section */}
       <div
         ref={containerRef}
-        className="relative h-screen w-full flex justify-center items-center overflow-hidden bg-transparent -mt-[90vh] md:-mt-[70vh]"
+        className="relative h-[100svh] w-full flex justify-center items-center overflow-hidden bg-transparent -mt-[90vh] md:-mt-[70vh]"
       >
         {/* Ribbon Layer */}
         {eventLabels.map((label, i) => (
           <div
             key={`ribbon-${i}`}
             ref={el => (ribbonsRef.current[i] = el)}
-            className={`absolute w-[300vw] md:w-[200vw] h-10 md:h-16 ${i % 2 === 0 ? 'bg-[#FED700]' : 'bg-[#04F24E]'} flex items-center justify-center z-20 shadow-2xl bottom-0`}
+            className={`
+              absolute
+              ${i === 1 ? 'h-[200vh] md:h-[250vh] w-10 right-0 bottom-auto bg-[#04F24E]' : 'w-[300vw] md:w[200vh] h-10 bottom-0 bg-[#FED700]'}
+              flex items-center justify-center
+              z-20 shadow-2xl
+            `}
           >
-            <span className={`${pressStart2P.className} text-black text-xl md:text-4xl whitespace-nowrap`}>
-            • {label} • {label} • {label} •
+            <span className={`${pressStart2P.className} text-black text-xl md:text-4xl whitespace-nowrap ${i === 1 && 'rotate-90'}`}>
+              • {label} • {label} • {label} •
             </span>
           </div>
         ))}
@@ -260,7 +281,7 @@ export default function Home() {
       </div>
 
       {/* Spacer for scroll depth */}
-      <div className="h-screen" />
+      <div className="h-[100svh]" />
     </section>
   );
 }
