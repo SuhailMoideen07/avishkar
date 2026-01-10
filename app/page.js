@@ -53,7 +53,7 @@ export default function Home() {
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top top",
-        end: "+=400%",
+        end: "+=330%",
         scrub: 1,
         pin: true,
         anticipatePin: 1,
@@ -138,7 +138,7 @@ export default function Home() {
           enableWebcam={false}
         />
       </div>
-      <div className='h-[100svh] fixed inset-0 z-20 '>
+      <div className='h-[100dvh] fixed inset-0 z-20 '>
         <StaggeredMenu
           position="right"
           items={menuItems}
@@ -155,7 +155,7 @@ export default function Home() {
           onMenuClose={() => console.log('Menu closed')}
         />
       </div>
-      <div className="relative h-[100svh] flex justify-center items-center overflow-hidden">
+      <div className="relative h-[100dvh] flex justify-center items-center overflow-hidden">
         {/* Star 1 */}
         <Image
           ref={el => (starsRef.current[0] = el)}
@@ -239,7 +239,7 @@ export default function Home() {
       {/* Cinematic Image Sequence Section */}
       <div
         ref={containerRef}
-        className="relative h-[100svh] w-full flex justify-center items-center overflow-hidden bg-transparent -mt-[90vh] md:-mt-[70vh]"
+        className="relative h-[100dvh] w-full flex justify-center items-center overflow-hidden bg-transparent -mt-[90vh] md:-mt-[70vh]"
       >
         {/* Ribbon Layer */}
         {eventLabels.map((label, i) => (
@@ -248,7 +248,7 @@ export default function Home() {
             ref={el => (ribbonsRef.current[i] = el)}
             className={`
               absolute
-              ${i === 1 ? 'h-[200vh] md:h-[250vh] w-10 right-0 bottom-auto bg-[#04F24E]' : 'w-[300vw] md:w[200vh] h-10 bottom-0 bg-[#FED700]'}
+              ${i === 1 ? 'h-[200vh] md:h-[250vh] w-10 right-0 bottom-auto bg-[#04F24E]' : 'w-[300vw] md:w-[200vh] h-10 bottom-0 bg-[#FED700]'}
               flex items-center justify-center
               z-20 shadow-2xl
             `}
@@ -280,8 +280,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Spacer for scroll depth */}
-      <div className="h-[100svh]" />
     </section>
   );
 }
