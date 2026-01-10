@@ -15,13 +15,14 @@ const DecayCard = dynamic(
 
 const menuItems = [
   { label: 'Home', ariaLabel: 'Go to home page', link: '/' },
+  { label: 'Events', ariaLabel: 'View our events', link: '/events' },
   { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
-  { label: 'Services', ariaLabel: 'View our services', link: '/services' },
   { label: 'Contact', ariaLabel: 'Get in touch', link: '/contact' }
 ];
 
 const socialItems = [
   { label: 'Instagram', link: 'https://instagram.com' },
+  { label: 'Website', link: 'https://musaliarcollege.com/' },
 ];
 
 export default function Home() {
@@ -45,7 +46,7 @@ export default function Home() {
           enableWebcam={false}
         />
       </div>
-      <div className='h-screen fixed inset-0 z-20 '>
+      <div className='h-[100dvh] fixed inset-0 z-20 '>
         <StaggeredMenu
           position="right"
           items={menuItems}
@@ -115,12 +116,15 @@ export default function Home() {
           loopDelay={3}
         />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="">
 
+        {/* <Image src='/images/event (1).png' alt='evnt' height={450} width={450} />
+        <Image src='/images/event (2).png' alt='evnt' height={450} width={450} />
+        <Image src='/images/event (3).png' alt='evnt' height={450} width={450} /> */}
         <DecayCard
           image="/images/event (1).png"
           enableGyro={true}
-          gyroSensitivity={0.3}
+          gyroSensitivity={0.8}
         >
         </DecayCard>
 

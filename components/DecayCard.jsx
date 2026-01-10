@@ -7,59 +7,160 @@ const DecayCard = ({
   image = 'https://picsum.photos/300/400?grayscale', 
   children,
   enableGyro = false,
-  gyroSensitivity = 1.0
+  gyroSensitivity = 0.55,
+  smoothTime = 0.25,
+  snapBackDelay = 250
 }) => {
   const svgRef = useRef(null);
   const displacementMapRef = useRef(null);
+  
+  // Mouse cursor position
   const cursor = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
   const cachedCursor = useRef({ ...cursor.current });
   const winsize = useRef({ width: window.innerWidth, height: window.innerHeight });
+  
+  // Gyro state
   const [isGyroActive, setIsGyroActive] = useState(false);
-  const gyroPosition = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  
+  // Smooth damping targets and current values (similar to GridScan)
+  const posTarget = useRef({ x: 0, y: 0 });
+  const posCurrent = useRef({ x: 0, y: 0 });
+  const posVelocity = useRef({ x: 0, y: 0 });
 
+  // Smooth damping function from GridScan
+  const smoothDamp = (current, target, velocity, smoothTime, maxSpeed, deltaTime) => {
+    smoothTime = Math.max(0.0001, smoothTime);
+    const omega = 2 / smoothTime;
+    const x = omega * deltaTime;
+    const exp = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+
+    let changeX = current.x - target.x;
+    let changeY = current.y - target.y;
+    const originalToX = target.x;
+    const originalToY = target.y;
+
+    const maxChange = maxSpeed * smoothTime;
+    const changeLen = Math.sqrt(changeX * changeX + changeY * changeY);
+    if (changeLen > maxChange && changeLen > 0) {
+      const scale = maxChange / changeLen;
+      changeX *= scale;
+      changeY *= scale;
+    }
+
+    target.x = current.x - changeX;
+    target.y = current.y - changeY;
+
+    const tempX = (velocity.x + omega * changeX) * deltaTime;
+    const tempY = (velocity.y + omega * changeY) * deltaTime;
+    
+    velocity.x = (velocity.x - omega * tempX) * exp;
+    velocity.y = (velocity.y - omega * tempY) * exp;
+
+    const outX = target.x + (changeX + tempX) * exp;
+    const outY = target.y + (changeY + tempY) * exp;
+
+    const origMinusCurrentX = originalToX - current.x;
+    const origMinusCurrentY = originalToY - current.y;
+    const outMinusOrigX = outX - originalToX;
+    const outMinusOrigY = outY - originalToY;
+
+    if (origMinusCurrentX * outMinusOrigX + origMinusCurrentY * outMinusOrigY > 0) {
+      return { x: originalToX, y: originalToY };
+    }
+
+    return { x: outX, y: outY };
+  };
+
+  const lerp = (a, b, n) => (1 - n) * a + n * b;
+  const map = (x, a, b, c, d) => ((x - a) * (d - c)) / (b - a) + c;
+  const distance = (x1, x2, y1, y2) => Math.hypot(x1 - x2, y1 - y2);
+  const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+
+  // Mouse move handler
   useEffect(() => {
-    const lerp = (a, b, n) => (1 - n) * a + n * b;
-    const map = (x, a, b, c, d) => ((x - a) * (d - c)) / (b - a) + c;
-    const distance = (x1, x2, y1, y2) => Math.hypot(x1 - x2, y1 - y2);
-    const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+    let leaveTimer = null;
 
+    const handleMouseMove = (ev) => {
+      if (isGyroActive) return;
+      
+      if (leaveTimer) {
+        clearTimeout(leaveTimer);
+        leaveTimer = null;
+      }
+
+      const nx = (ev.clientX / winsize.current.width) * 2 - 1;
+      const ny = (ev.clientY / winsize.current.height) * 2 - 1;
+      
+      posTarget.current = { x: nx, y: ny };
+    };
+
+    const handleMouseLeave = () => {
+      if (isGyroActive) return;
+      
+      if (leaveTimer) clearTimeout(leaveTimer);
+      leaveTimer = setTimeout(() => {
+        posTarget.current = { x: 0, y: 0 };
+      }, snapBackDelay);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseleave', handleMouseLeave);
+      if (leaveTimer) clearTimeout(leaveTimer);
+    };
+  }, [isGyroActive, snapBackDelay]);
+
+  // Window resize handler
+  useEffect(() => {
     const handleResize = () => {
       winsize.current = { width: window.innerWidth, height: window.innerHeight };
     };
 
-    const handleMouseMove = ev => {
-      if (!isGyroActive) {
-        cursor.current = { x: ev.clientX, y: ev.clientY };
-      }
-    };
-
     window.addEventListener('resize', handleResize);
-    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
+  // Main render loop with smooth damping
+  useEffect(() => {
     const imgValues = {
       imgTransforms: { x: 0, y: 0, rz: 0 },
       displacementScale: 0
     };
 
-    const render = () => {
-      // Use gyro position if active, otherwise use cursor
-      const activePosition = isGyroActive ? gyroPosition.current : cursor.current;
+    let lastTime = performance.now();
+    const maxSpeed = Infinity;
 
-      let targetX = lerp(
-        imgValues.imgTransforms.x, 
-        map(activePosition.x, 0, winsize.current.width, -120, 120), 
-        0.1
+    const render = () => {
+      const now = performance.now();
+      const deltaTime = Math.max(0, Math.min(0.1, (now - lastTime) / 1000));
+      lastTime = now;
+
+      // Apply smooth damping to position
+      const smoothed = smoothDamp(
+        posCurrent.current,
+        posTarget.current,
+        posVelocity.current,
+        smoothTime,
+        maxSpeed,
+        deltaTime
       );
-      let targetY = lerp(
-        imgValues.imgTransforms.y, 
-        map(activePosition.y, 0, winsize.current.height, -120, 120), 
-        0.1
-      );
-      let targetRz = lerp(
-        imgValues.imgTransforms.rz, 
-        map(activePosition.x, 0, winsize.current.width, -10, 10), 
-        0.1
-      );
+
+      posCurrent.current = smoothed;
+
+      // Map smoothed normalized coordinates to pixel space
+      const mappedX = map(posCurrent.current.x, -1, 1, 0, winsize.current.width);
+      const mappedY = map(posCurrent.current.y, -1, 1, 0, winsize.current.height);
+
+      // Update cursor for distance calculation
+      cursor.current = { x: mappedX, y: mappedY };
+
+      // Calculate transforms
+      let targetX = lerp(imgValues.imgTransforms.x, map(mappedX, 0, winsize.current.width, -120, 120), 0.1);
+      let targetY = lerp(imgValues.imgTransforms.y, map(mappedY, 0, winsize.current.height, -120, 120), 0.1);
+      let targetRz = lerp(imgValues.imgTransforms.rz, map(mappedX, 0, winsize.current.width, -10, 10), 0.1);
 
       const bound = 50;
       if (targetX > bound) targetX = bound + (targetX - bound) * 0.2;
@@ -79,12 +180,14 @@ const DecayCard = ({
         });
       }
 
+      // Calculate displacement based on movement
       const cursorTravelledDistance = distance(
         cachedCursor.current.x,
-        activePosition.x,
+        cursor.current.x,
         cachedCursor.current.y,
-        activePosition.y
+        cursor.current.y
       );
+
       imgValues.displacementScale = lerp(
         imgValues.displacementScale,
         map(cursorTravelledDistance, 0, 200, 0, 400),
@@ -95,60 +198,48 @@ const DecayCard = ({
         gsap.set(displacementMapRef.current, { attr: { scale: imgValues.displacementScale } });
       }
 
-      cachedCursor.current = { ...activePosition };
+      cachedCursor.current = { ...cursor.current };
 
       requestAnimationFrame(render);
     };
 
-    render();
+    const rafId = requestAnimationFrame(render);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(rafId);
     };
-  }, [isGyroActive]);
+  }, [smoothTime]);
 
-  // Gyroscope support
+  // Gyroscope support with smooth damping
   useEffect(() => {
     if (!enableGyro) return;
 
-    const handleOrientation = (event) => {
-      const gamma = event.gamma ?? 0; // left/right tilt (-90 to 90)
-      const beta = event.beta ?? 0;   // front/back tilt (-180 to 180)
+    const s = clamp(gyroSensitivity, 0, 1);
+    const gyroScale = lerp(0.6, 1.8, s);
 
-      // Check if device is in portrait or landscape
+    const handleOrientation = (event) => {
+      const gamma = event.gamma ?? 0;
+      const beta = event.beta ?? 0;
+
       const isPortrait = window.innerHeight > window.innerWidth;
 
-      let normalizedX, normalizedY;
-
+      let nx, ny;
       if (isPortrait) {
-        // Portrait mode: use beta for X, gamma for Y
-        normalizedX = Math.max(-1, Math.min(1, -beta / 30));
-        normalizedY = Math.max(-1, Math.min(1, gamma / 45));
+        nx = clamp(-beta / 30, -1, 1) * gyroScale;
+        ny = clamp(gamma / 45, -1, 1) * gyroScale;
       } else {
-        // Landscape mode: use gamma for X, beta for Y
-        normalizedX = Math.max(-1, Math.min(1, gamma / 45));
-        normalizedY = Math.max(-1, Math.min(1, -beta / 30));
+        nx = clamp(gamma / 45, -1, 1) * gyroScale;
+        ny = clamp(-beta / 30, -1, 1) * gyroScale;
       }
 
-      // Apply sensitivity
-      normalizedX *= gyroSensitivity;
-      normalizedY *= gyroSensitivity;
-
-      // Map to screen coordinates
-      const x = ((normalizedX + 1) / 2) * winsize.current.width;
-      const y = ((normalizedY + 1) / 2) * winsize.current.height;
-
-      gyroPosition.current = { x, y };
-      setIsGyroActive(true);
+      // Update target, not current position (smooth damping will handle it)
+      posTarget.current = { x: nx, y: ny };
+      
+      if (!isGyroActive) {
+        setIsGyroActive(true);
+      }
     };
 
-    const handleMotion = () => {
-      // Detect when device is moving to activate gyro mode
-      setIsGyroActive(true);
-    };
-
-    // Request permission for iOS 13+
     const requestPermission = async () => {
       if (
         typeof DeviceOrientationEvent !== 'undefined' &&
@@ -158,41 +249,23 @@ const DecayCard = ({
           const permission = await DeviceOrientationEvent.requestPermission();
           if (permission === 'granted') {
             window.addEventListener('deviceorientation', handleOrientation);
-            window.addEventListener('devicemotion', handleMotion, { once: true });
           }
         } catch (error) {
           console.error('DeviceOrientation permission denied:', error);
         }
       } else {
-        // Non-iOS devices
         window.addEventListener('deviceorientation', handleOrientation);
-        window.addEventListener('devicemotion', handleMotion, { once: true });
       }
     };
 
-    // Auto-request on mount, or wait for user interaction
     requestPermission();
-
-    // Fallback to mouse when gyro becomes inactive
-    const resetGyroTimer = setTimeout(() => {
-      const checkGyroActivity = setInterval(() => {
-        const timeSinceLastUpdate = Date.now() - (gyroPosition.current.lastUpdate || 0);
-        if (timeSinceLastUpdate > 1000) {
-          setIsGyroActive(false);
-        }
-      }, 2000);
-
-      return () => clearInterval(checkGyroActivity);
-    }, 5000);
 
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);
-      window.removeEventListener('devicemotion', handleMotion);
-      clearTimeout(resetGyroTimer);
     };
-  }, [enableGyro, gyroSensitivity]);
+  }, [enableGyro, gyroSensitivity, isGyroActive]);
 
-  // Click handler for iOS permission request
+  // Click handler for iOS permission
   const handleClick = async () => {
     if (
       enableGyro &&
