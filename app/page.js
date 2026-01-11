@@ -13,17 +13,7 @@ import FuzzyText from '@/components/FuzzyText';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const menuItems = [
-  { label: 'Home', ariaLabel: 'Go to home page', link: '/' },
-  { label: 'Events', ariaLabel: 'View our events', link: '/events' },
-  { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
-  { label: 'Contact', ariaLabel: 'Get in touch', link: '/contact' }
-];
 
-const socialItems = [
-  { label: 'Instagram', link: 'https://www.instagram.com/avishkar_.26' },
-  { label: 'Website', link: 'https://musaliarcollege.com' },
-];
 
 const eventLabels = ["MUSALIAR COLLAGE", "PATHANAMTHITTA", "FEB 5, 6, 7"];
 
@@ -159,23 +149,7 @@ export default function Home() {
           enableWebcam={false}
         />
       </div>
-      <div className='h-[100dvh] fixed inset-0 z-20 '>
-        <StaggeredMenu
-          position="right"
-          items={menuItems}
-          socialItems={socialItems}
-          displaySocials={true}
-          displayItemNumbering={true}
-          menuButtonColor="#FFFFE0"
-          openMenuButtonColor="#000000"
-          changeMenuColorOnOpen={true}
-          colors={['#FFFFE0', '#FED700']}
-          logoUrl="/images/star.svg"
-          accentColor="#FED700"
-          onMenuOpen={() => console.log('Menu opened')}
-          onMenuClose={() => console.log('Menu closed')}
-        />
-      </div>
+      
       <div className="relative h-[100dvh] flex justify-center items-center overflow-hidden">
         {/* Star 1 */}
         <Image
