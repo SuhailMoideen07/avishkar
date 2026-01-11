@@ -133,6 +133,10 @@ export default function Home() {
       ease: "power2.out"
     }, ">-0.5");
 
+    tl.to({}, { duration: 0.3 });
+    
+    ScrollTrigger.config({ ignoreMobileResize: false });
+    ScrollTrigger.refresh();
   }, { scope: containerRef });
 
   return (
@@ -256,7 +260,7 @@ export default function Home() {
       {/* Cinematic Image Sequence Section */}
       <div
         ref={containerRef}
-        className="relative h-[100dvh] w-full flex justify-center items-center overflow-hidden bg-transparent -mt-[90vh] md:-mt-[70vh]"
+        className="relative h-[100dvh] w-full flex justify-center items-center overflow-hidden bg-transparent -mt-[90dvh] md:-mt-[70dvh]"
       >
         {/* Ribbon Layer */}
         {eventLabels.map((label, i) => (
