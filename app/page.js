@@ -269,7 +269,8 @@ export default function Home() {
             ref={el => (ribbonsRef.current[i] = el)}
             className={`
               absolute
-              ${i === 1 ? 'h-[170vh] md:h-[300vh] w-10 right-0 bottom-auto bg-[#04F24E]' : 'w-[300vw] md:w-[350vh] h-10 bottom-0 bg-[#FED700]'}
+              ${i === 1 && 'h-[170vh] md:h-[300vh] w-10 right-0 bottom-auto bg-[#04F24E]'}
+              ${i % 2 === 0 && 'w-[300vw] md:w-[350vh] h-10 bottom-0 bg-[#FED700]'}
               flex items-center justify-center
               z-20 shadow-2xl
             `}
