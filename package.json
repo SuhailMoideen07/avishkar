@@ -22,6 +22,7 @@
     "next": "16.1.1",
     "ogl": "^1.0.11",
     "postprocessing": "^6.38.2",
+    "qrcode": "^1.5.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "tailwind-merge": "^3.4.0",
