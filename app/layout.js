@@ -36,7 +36,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Preload />
+        {/* <Preload /> */}
         <div className='h-[100dvh] fixed inset-0 z-20 '>
           <StaggeredMenu
             position="right"
