@@ -94,6 +94,7 @@ const Card = ({ card }) => {
                 >
                     <Image
                         src="/images/button.png"
+                        alt="btn image"
                         width={130}
                         height={130}
                         className="drop-shadow-[6px_6px_0px_#000] drop-shadow-[#410b0e] comic-outline"
