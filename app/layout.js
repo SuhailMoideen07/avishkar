@@ -21,6 +21,7 @@ export const metadata = {
 const menuItems = [
   { label: 'Home', ariaLabel: 'Go to home page', link: '/' },
   { label: 'Events', ariaLabel: 'View our events', link: '/events' },
+  { label: 'Expo', ariaLabel: 'View our Expo', link: '/expo' },
   { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
   { label: 'Contact', ariaLabel: 'Get in touch', link: '/contact' }
 ];
@@ -44,12 +45,12 @@ export default function RootLayout({ children }) {
             socialItems={socialItems}
             displaySocials={true}
             displayItemNumbering={true}
-            menuButtonColor="#FFFFE0"
+            menuButtonColor="#fff"
             openMenuButtonColor="#000000"
             changeMenuColorOnOpen={true}
-            colors={['#FFFFE0', '#FED700']}
+            colors={['#FF7A7B', '#AD242C']}
             logoUrl="/images/star.svg"
-            accentColor="#FED700"
+            accentColor="#AD242C"
           />
         </div>
 
