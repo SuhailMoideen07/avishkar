@@ -33,11 +33,11 @@ const socialItems = [
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Preload />
-        <div className='h-[100dvh] fixed inset-0 z-20 '>
+
+        {/* IMPORTANT FIX: pointer-events-none */}
+        <div className="h-[100dvh] fixed inset-0 z-20 pointer-events-none">
           <StaggeredMenu
             position="right"
             items={menuItems}
@@ -52,6 +52,7 @@ export default function RootLayout({ children }) {
             accentColor="#FED700"
           />
         </div>
+
         {children}
       </body>
     </html>
