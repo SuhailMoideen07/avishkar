@@ -4,7 +4,9 @@ import Event from "@/lib/models/Event";
 import Registration from "@/lib/models/Registration";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-import { adminAuth } from "@/lib/adminAuth"; // Use middleware
+//import { adminAuth } from "@/lib/adminAuth"; // Use middleware
+import { adminAuth } from "@/lib/middleware/adminAuth";
+
 
 /* =====================================================
    ➕ ADD EVENT (ADMIN)
