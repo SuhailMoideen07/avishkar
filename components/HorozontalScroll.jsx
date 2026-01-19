@@ -4,9 +4,9 @@ import { useRef } from "react";
 const Example = () => {
     return (
         <div className=""
-            style={{
-                background: "linear-gradient(0deg, rgba(255,252,252,1) 0%, rgba(0,0,0,0.98) 67%)",
-            }}
+            // style={{
+            //     background: "linear-gradient(0deg, rgba(255,252,252,1) 0%, rgba(0,0,0,0.98) 67%)",
+            // }}
         >
             <div className="flex h-44 items-center justify-center">
                 <span className="font-extrabold text-left uppercase text-neutral-500 text-4xl">

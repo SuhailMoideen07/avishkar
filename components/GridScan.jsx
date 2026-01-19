@@ -896,7 +896,7 @@ export const GridScan = ({
 
 function srgbColor(hex) {
   const c = new THREE.Color(hex);
-  return c.convertSRGBToLinear();
+  return c;
 }
 
 function smoothDampVec2(current, target, currentVelocity, smoothTime, maxSpeed, deltaTime) {
