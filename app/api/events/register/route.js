@@ -4,7 +4,7 @@ import Event from "@/lib/models/Event";
 import Registration from "@/lib/models/Registration";
 import QRCode from "qrcode";
 import crypto from "crypto";
-// import { auth } from "@clerk/nextjs/server"; // enable later
+import { auth } from "@clerk/nextjs/server"; // enable later
 
 export async function POST(req) {
   try {
@@ -14,10 +14,10 @@ export async function POST(req) {
        🔐 AUTHENTICATION (TEMP MODE)
        ===================================================== */
     // TEMP: Using header for Postman testing
-    const userId = req.headers.get("x-user-id");
+    // const userId = req.headers.get("x-user-id");
 
     // FINAL (Clerk):
-    // const { userId: clerkUserId } = auth();
+    const { userId: clerkUserId } = auth();
 
     if (!userId) {
       return Response.json(
