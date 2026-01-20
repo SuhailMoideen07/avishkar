@@ -22,7 +22,6 @@ const MainEventsPage = () => {
               className="
                 relative w-[220px] md:w-[260px] aspect-[3/4]
                 transition-transform duration-300
-                group-hover:-translate-y-2
               "
             >
               <Image
@@ -32,7 +31,6 @@ const MainEventsPage = () => {
                 className="
                   object-contain
                   transition-all duration-300
-                  group-hover:scale-105
                   group-hover:drop-shadow-[0_0_50px_rgba(220,38,38,0.7)]
                 "
                 priority
@@ -71,25 +69,46 @@ const MainEventsPage = () => {
         <div className="w-full px-6 md:px-10 pb-12 md:pb-16 text-center space-y-4">
 
           <Link href="/events/main/treasure-hunt" className="group mx-auto w-fit block">
-            <div
-              className="
-                relative w-[220px] md:w-[260px] aspect-[3/4]
-                transition-transform duration-300
-                group-hover:-translate-y-2
-              "
-            >
-              <Image
-                src="/events/treasure-hunt.png"
-                alt="Treasure Hunt"
-                fill
+            <div className="relative flex items-center justify-center">
+              {/* Peeking Deadpool */}
+              <div
                 className="
-                  object-contain
+                  absolute -left-28 md:-left-36 -top-8 md:-top-12
+                  w-[180px] md:w-[220px] h-[180px] md:h-[220px]
                   transition-all duration-300
-                  group-hover:scale-105
-                  group-hover:drop-shadow-[0_0_50px_rgba(220,38,38,0.7)]
+                  group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]
+                  z-10
+                  -translate-x-[7px] md:-translate-x-[2px]
                 "
-                priority
-              />
+              >
+                <Image
+                  src="/events/dead-pool.png"
+                  alt="Deadpool Peeking"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+
+              {/* Treasure Hunt Card */}
+              <div
+                className="
+                  relative w-[220px] md:w-[260px] aspect-[3/4]
+                  transition-transform duration-300
+                "
+              >
+                <Image
+                  src="/events/treasure-hunt.png"
+                  alt="Treasure Hunt"
+                  fill
+                  className="
+                    object-contain
+                    transition-all duration-300
+                    group-hover:drop-shadow-[0_0_50px_rgba(220,38,38,0.7)]
+                  "
+                  priority
+                />
+              </div>
             </div>
           </Link>
 
