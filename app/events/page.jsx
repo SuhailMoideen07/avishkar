@@ -17,7 +17,6 @@ export default function EventsPage() {
       <div className="w-full md:w-1/2 min-h-[50dvh] md:min-h-[100dvh] flex items-end justify-center">
         <div className="w-full px-6 md:px-10 pb-12 md:pb-16 text-center space-y-4">
 
-          {/* CARD IMAGE (CLICKABLE + HOVER TARGET) */}
           <Link href="/events/main" className="group mx-auto w-fit block">
             <div
               className="
@@ -41,11 +40,10 @@ export default function EventsPage() {
             </div>
           </Link>
 
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
+          <h2 className="deadpool-heading text-4xl md:text-5xl">
             Main Events
           </h2>
 
-          {/* EXPLORE BUTTON (CLICKABLE ONLY) */}
           <div className="pt-1">
             <Link href="/events/main">
               <span
@@ -72,7 +70,6 @@ export default function EventsPage() {
       <div className="w-full md:w-1/2 min-h-[50dvh] md:min-h-[100dvh] flex items-end justify-center">
         <div className="w-full px-6 md:px-10 pb-12 md:pb-16 text-center space-y-4">
 
-          {/* CARD IMAGE (CLICKABLE + HOVER TARGET) */}
           <Link href="/events/dept" className="group mx-auto w-fit block">
             <div
               className="
@@ -96,11 +93,10 @@ export default function EventsPage() {
             </div>
           </Link>
 
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
+          <h2 className="deadpool-heading text-4xl md:text-5xl">
             Department Events
           </h2>
 
-          {/* EXPLORE BUTTON (CLICKABLE ONLY) */}
           <div className="pt-1">
             <Link href="/events/dept">
               <span

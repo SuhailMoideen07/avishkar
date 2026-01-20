@@ -123,3 +123,14 @@
     @apply bg-background text-foreground;
   }
 }
+.deadpool-heading {
+  font-family: var(--font-bangers), cursive;
+  color: #ef4444; /* Tailwind red-500 */
+  letter-spacing: 0.08em;
+  text-shadow:
+    3px 3px 0px #000,
+    6px 6px 0px #111,
+    9px 9px 0px #1a1a1a;
+}
+
+
