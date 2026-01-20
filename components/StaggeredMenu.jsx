@@ -2,6 +2,7 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export const StaggeredMenu = ({
   position = 'right',
@@ -383,17 +384,16 @@ export const StaggeredMenu = ({
         <header
           className="staggered-menu-header absolute top-0 left-0 w-full flex items-center justify-between p-[2em] bg-transparent pointer-events-none z-20"
           aria-label="Main navigation header">
-          <div
-            className="sm-logo flex items-center select-none pointer-events-auto"
-            aria-label="Logo">
-            {/* <img
-              src={logoUrl || '/src/assets/logos/reactbits-gh-white.svg'}
-              alt="Logo"
-              className="sm-logo-img block h-8 w-auto object-contain"
-              draggable={false}
-              width={110}
-              height={24} /> */}
-          </div>
+          <Link href="/" className="sm-logo flex items-center select-none pointer-events-auto" aria-label="Logo">
+  <Image
+    src={logoUrl || '/src/assets/logos/reactbits-gh-white.svg'}
+    alt="Logo"
+    className="sm-logo-img block h-16 w-16 object-contain"
+    draggable={false}
+    width={110}
+    height={24}
+  />
+</Link>
 
           <button
             ref={toggleBtnRef}

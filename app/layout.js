@@ -61,7 +61,7 @@ export default function RootLayout({ children }) {
                 openMenuButtonColor="#000000"
                 changeMenuColorOnOpen={true}
                 colors={["#FF7A7B", "#AD242C"]}
-                logoUrl="/images/star.svg"
+                logoUrl="/images/logo.PNG"
                 accentColor="#AD242C"
               />
             </div>

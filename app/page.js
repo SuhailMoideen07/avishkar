@@ -121,7 +121,7 @@ const Page = () => {
         />
 
         <div className="">
-          <Shuffle
+          {/* <Shuffle
             className={`${pressStart2P.className}`}
             text="Avishkar"
             shuffleDirection="right"
@@ -136,6 +136,12 @@ const Page = () => {
             respectReducedMotion={true}
             loop
             loopDelay={3}
+          /> */}
+          <Image
+          src='/images/logoName.PNG'
+          alt='logo'
+          width={400}
+          height={400}
           />
           <h3 className={`${pressStart2P.className} text-lg`}>2026</h3>
         </div>
