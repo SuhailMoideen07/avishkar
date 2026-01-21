@@ -56,7 +56,7 @@ const Card = ({ card }) => {
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                 }}
-                className="absolute inset-0 z-0 transition-transform duration-300 group-hover:scale-110"
+                className="absolute inset-0 z-0"
             ></div>
 
             {/* Dark fade */}
@@ -112,19 +112,19 @@ const cards = [
     {
         url: "/images/highlights/autoShow.webp",
         title: "Auto Show",
-        path: "/expo#autoshow",
+        path: "/auto-show",
         id: 1,
     },
     {
         url: "/images/highlights/proShow1.webp",
         title: "Pro Show 1",
-        path: "/expo#proshow1",
+        path: "/pro-show#proshow1",
         id: 2,
     },  
     {
         url: "/images/highlights/proShow2.webp",
         title: "Pro Show 2",
-        path: "/expo#proshow2",
+        path: "/pro-show#proshow2",
         id: 3,
     },
     {

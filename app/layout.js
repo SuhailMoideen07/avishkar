@@ -29,7 +29,8 @@ export const metadata = {
 const menuItems = [
   { label: "Home", ariaLabel: "Go to home page", link: "/" },
   { label: "Events", ariaLabel: "View our events", link: "/events" },
-  { label: "Expo", ariaLabel: "View our Expo", link: "/expo" },
+  { label: "Auto Show", ariaLabel: "View our AutoShow", link: "/auto-show" },
+  { label: "Pro Show", ariaLabel: "View our Expo", link: "/pro-show" },
   { label: "About", ariaLabel: "Learn about us", link: "/about" },
   { label: "Contact", ariaLabel: "Get in touch", link: "/contact" },
 ];

@@ -8,7 +8,7 @@ const items = [
         image: "/images/pistonia/joji.jpg",
         title: "Joji Thampi",
         handle: "@joji_thampi",
-        subtitle:"Chief Guest",
+        subtitle: "Chief Guest",
         borderColor: "#FFD700",
         gradient: "linear-gradient(165deg, #FFD700, #000)",
         url: "https://www.instagram.com/joji_thampi/"
@@ -36,17 +36,14 @@ const page = () => {
         <>
             <section id='autoshow' className=''>
                 <SmoothScrollHero />
-                <div className='bg-black'>
-                    <ChromaGrid
-                    className=''
-                        items={items}
-                        radius={300}
-                        damping={0.45}
-                        fadeOut={0.6}
-                        ease="power3.out"
-                    />
-                </div>
-
+                <ChromaGrid
+                    className='bg-black'
+                    items={items}
+                    radius={300}
+                    damping={0.45}
+                    fadeOut={0.6}
+                    ease="power3.out"
+                />
             </section>
         </>
     )
