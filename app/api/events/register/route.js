@@ -2,41 +2,34 @@ import { connectDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import Event from "@/lib/models/Event";
 import Registration from "@/lib/models/Registration";
-import QRCode from "qrcode";
+import cloudinary from "@/lib/cloudinary";
 import crypto from "crypto";
-import { auth } from "@clerk/nextjs/server"; // enable later
+import { auth } from "@clerk/nextjs/server";
 
+/* =====================================================
+   REGISTER FOR EVENT
+   ===================================================== */
 export async function POST(req) {
   try {
     await connectDB();
 
-    /* =====================================================
-       🔐 AUTHENTICATION (TEMP MODE)
-       ===================================================== */
-    // TEMP: Using header for Postman testing
-    // const userId = req.headers.get("x-user-id");
-
-    // FINAL (Clerk):
-    const { userId: clerkUserId } = auth();
+    /* =====================
+       🔐 AUTH (CLERK)
+       ===================== */
+    const { userId } = auth();
 
     if (!userId) {
-      return Response.json(
-        { message: "Unauthorized: user not found" },
-        { status: 401 }
-      );
+      return Response.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findOne({ clerkUserId: userId });
     if (!user) {
-      return Response.json(
-        { message: "User does not exist" },
-        { status: 404 }
-      );
+      return Response.json({ message: "User does not exist" }, { status: 404 });
     }
 
-    /* =====================================================
+    /* =====================
        📥 REQUEST BODY
-       ===================================================== */
+       ===================== */
     const {
       eventId,
       name,
@@ -48,19 +41,19 @@ export async function POST(req) {
       semester,
       schoolClass,
       teamMembers = [],
-      paymentScreenshot,
+      paymentScreenshot, // base64 image
     } = await req.json();
 
-    /* =====================================================
-       ✅ BASIC VALIDATION
-       ===================================================== */
+    /* =====================
+       ✅ VALIDATION
+       ===================== */
     if (
       !eventId ||
       !name ||
       !age ||
       !phone ||
       !college ||
-      !participantDepartment||
+      !participantDepartment ||
       !participantType ||
       !paymentScreenshot
     ) {
@@ -91,9 +84,9 @@ export async function POST(req) {
       );
     }
 
-    /* =====================================================
-       🎯 EVENT VALIDATION
-       ===================================================== */
+    /* =====================
+       🎯 EVENT CHECK
+       ===================== */
     const event = await Event.findById(eventId);
     if (!event || !event.isActive) {
       return Response.json(
@@ -102,20 +95,18 @@ export async function POST(req) {
       );
     }
 
-    if (event.type === "team") {
-      if (teamMembers.length !== event.teamSize) {
-        return Response.json(
-          { message: `Team size must be ${event.teamSize}` },
-          { status: 400 }
-        );
-      }
+    if (event.type === "team" && teamMembers.length !== event.teamSize) {
+      return Response.json(
+        { message: `Team size must be ${event.teamSize}` },
+        { status: 400 }
+      );
     }
 
-    /* =====================================================
-       ❌ DUPLICATE REGISTRATION CHECK
-       ===================================================== */
+    /* =====================
+       ❌ DUPLICATE CHECK
+       ===================== */
     const alreadyRegistered = await Registration.findOne({
-      userId,
+      userId: user._id,
       eventId,
     });
 
@@ -126,17 +117,27 @@ export async function POST(req) {
       );
     }
 
-    /* =====================================================
-       🆔 UNIQUE CODE + QR GENERATION
-       ===================================================== */
-    const uniqueCode = crypto.randomUUID();
-    const qrCode = await QRCode.toDataURL(uniqueCode);
+    /* =====================
+       🖼️ UPLOAD PAYMENT IMAGE
+       ===================== */
+    const uploadResult = await cloudinary.uploader.upload(
+      paymentScreenshot,
+      {
+        folder: "payment_screenshots",
+        resource_type: "image",
+      }
+    );
 
-    /* =====================================================
+    /* =====================
+       🆔 UNIQUE CODE
+       ===================== */
+    const uniqueCode = crypto.randomUUID();
+
+    /* =====================
        📝 SAVE REGISTRATION
-       ===================================================== */
+       ===================== */
     const registration = await Registration.create({
-      userId,
+      userId: user._id,
       eventId,
       name,
       age,
@@ -147,14 +148,10 @@ export async function POST(req) {
       semester: participantType === "college" ? semester : null,
       schoolClass: participantType === "school" ? schoolClass : null,
       teamMembers: event.type === "team" ? teamMembers : [],
-      paymentScreenshot,
+      paymentScreenshot: uploadResult.secure_url, // ✅ URL stored
       uniqueCode,
-      qrCode,
     });
 
-    /* =====================================================
-       ✅ RESPONSE
-       ===================================================== */
     return Response.json(
       {
         message: "Event registered successfully",
@@ -170,38 +167,85 @@ export async function POST(req) {
     );
   }
 }
-export async function GET(req) {
+
+/* =====================================================
+   GET USER REGISTRATIONS
+   ===================================================== */
+export async function GET() {
   try {
     await connectDB();
 
-    const userId = req.headers.get("x-user-id");
+    /* =====================
+       🔐 AUTH (CLERK)
+       ===================== */
+    const { userId } = auth();
 
     if (!userId) {
-      return Response.json(
-        { message: "Unauthorized: user not found" },
-        { status: 401 }
-      );
+      return Response.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findOne({ clerkUserId: userId });
     if (!user) {
-      return Response.json(
-        { message: "User does not exist" },
-        { status: 404 }
-      );
+      return Response.json({ message: "User does not exist" }, { status: 404 });
     }
 
-    const registrations = await Registration.find({ userId })
+    /* =====================
+       📦 FETCH REGISTRATIONS
+       ===================== */
+    const registrations = await Registration.find({ userId: user._id })
       .populate({
         path: "eventId",
-        select: "title description type teamSize eventCategory departmentId",
+        select: `
+          title
+          description
+          imageUrl
+          eventDate
+          startTime
+          endTime
+          eventCategory
+          department
+          type
+          teamSize
+        `,
       })
       .sort({ createdAt: -1 });
 
+    /* =====================
+       🎯 FORMAT RESPONSE
+       ===================== */
+    const dashboardData = registrations.map((reg) => ({
+      registrationId: reg._id,
+      uniqueCode: reg.uniqueCode, // ✅ REQUIRED
+      registeredAt: reg.createdAt,
+
+      event: {
+        id: reg.eventId?._id,
+        title: reg.eventId?.title,
+        description: reg.eventId?.description,
+        imageUrl: reg.eventId?.imageUrl,
+        eventDate: reg.eventId?.eventDate,
+        startTime: reg.eventId?.startTime,
+        endTime: reg.eventId?.endTime,
+        eventCategory: reg.eventId?.eventCategory,
+        department: reg.eventId?.department,
+        type: reg.eventId?.type,
+        teamSize: reg.eventId?.teamSize,
+      },
+
+      participant: {
+        name: reg.name,
+        college: reg.college,
+        participantDepartment: reg.participantDepartment,
+        participantType: reg.participantType,
+        semester: reg.semester,
+        schoolClass: reg.schoolClass,
+      },
+    }));
+
     return Response.json(
       {
-        count: registrations.length,
-        registrations,
+        count: dashboardData.length,
+        registrations: dashboardData,
       },
       { status: 200 }
     );
