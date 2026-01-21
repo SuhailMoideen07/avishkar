@@ -1,34 +1,48 @@
 import jwt from "jsonwebtoken";
+import { NextResponse } from "next/server";
 import { ADMIN_CREDENTIALS } from "@/lib/config/admins";
 
 export async function POST(req) {
-  const { username, password } = await req.json();
+  try {
+    const { username, password } = await req.json();
 
-  let department = null;
+    let department = null;
 
-  for (const [dept, creds] of Object.entries(ADMIN_CREDENTIALS)) {
-    if (creds.username === username && creds.password === password) {
-      department = dept;
-      break;
+    // 🔍 Check credentials
+    for (const [dept, creds] of Object.entries(ADMIN_CREDENTIALS)) {
+      if (creds.username === username && creds.password === password) {
+        department = dept;
+        break;
+      }
     }
-  }
 
-  if (!department) {
-    return Response.json(
-      { message: "Invalid credentials" },
-      { status: 401 }
+    if (!department) {
+      return NextResponse.json(
+        { message: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
+
+    // 🔐 Generate JWT (department stored here)
+    const token = jwt.sign(
+      {
+        role: "admin",
+        department,
+      },
+      process.env.ADMIN_JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return NextResponse.json({
+      message: "Login successful",
+      token,
+      department,
+    });
+  } catch (error) {
+    console.error("Login Error:", error);
+    return NextResponse.json(
+      { message: "Server Error" },
+      { status: 500 }
     );
   }
-
-  const token = jwt.sign(
-    { role: "admin", department },
-    process.env.ADMIN_JWT_SECRET,
-    { expiresIn: "1d" }
-  );
-
-  return Response.json({
-    message: "Login successful",
-    token,
-    department,
-  });
 }
