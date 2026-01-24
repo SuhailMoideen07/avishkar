@@ -398,6 +398,18 @@ export default function SmoothScrollComponent() {
         .spacer {
           height: 10vh;
         }
+        @media screen and (max-width: 768px) {
+  .image-grid {
+    width: 95vw;
+    padding-top: 10vh;
+    grid-column-gap: 0.5rem;
+    grid-row-gap: 0.5rem;
+  }
+  
+  .image-grid .image_cont {
+    aspect-ratio: 1/1;
+  }
+}
       `}</style>
 
       <div ref={wrapperRef} id="wrapper" className="smooth-scroll-wrapper">
