@@ -33,7 +33,7 @@ const HeroSection = () => {
             </div>
           </div>
           <div className="overflow-hidden">
-            <div className="relative text-right" data-line>Vibe</div>
+            <div className="relative text-right" data-line>-avishkar</div>
           </div>
         </div>
       </div>
@@ -353,7 +353,7 @@ export default function ScrollGSAPComponent() {
         '/images/proshow/zeropause/l4 (4).webp',
       ],
       title: 'saturday',
-      subtitle: '7:00pm',
+      subtitle: '6:30pm',
       colorClass: 'text-[#FDA2FD]',
     },
   ];

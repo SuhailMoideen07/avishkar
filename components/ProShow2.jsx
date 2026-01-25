@@ -435,12 +435,12 @@ export default function SmoothScrollComponent() {
           </section>
 
           <section className="bars container smooth-section">
-            {/* <div className="bars-text">
+            <div className="bars-text">
               <div className="flow content">
-                <h2>Speed Control</h2>
-                <p>Animate elements along at different speeds, slow them down or make them whizz past.</p>
+                <h2>7:00 PM</h2>
+                <p>@Musaliar College Pathanamthitta</p>
               </div>
-            </div> */}
+            </div>
             <div className="bars-cont">
               <div className="bar" data-speed="0.8">
                 <p>06 /</p>
