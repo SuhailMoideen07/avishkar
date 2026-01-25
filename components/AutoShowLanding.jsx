@@ -78,7 +78,7 @@ export default function ParallaxComponent() {
         }
       `}</style>
 
-      <div className="relative w-full overflow-hidden">
+      <div className="relative w-full overflow-hidden pb-20">
         {/* Parallax Header Section */}
         <section className="relative min-h-screen flex items-center justify-center py-20 px-8 z-[2]">
           <div className="absolute top-0 left-0 w-full h-[120%] object-cover">
@@ -168,7 +168,7 @@ export default function ParallaxComponent() {
           className="fixed inset-0 pointer-events-none z-[10]"
           style={{
             backgroundImage: 'radial-gradient(circle farthest-corner at 50% 50%, transparent, #000000)',
-            opacity: 0.1,
+            opacity: 0.5,
             mixBlendMode: 'multiply'
           }}
         ></div>
