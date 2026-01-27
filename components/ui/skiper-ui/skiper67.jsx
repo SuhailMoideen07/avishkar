@@ -63,7 +63,7 @@ export const Skiper67 = () => {
         onClick={openVideo}
         className="relative group cursor-pointer w-[280px] aspect-video sm:w-[400px] overflow-hidden shadow-2xl"
       >
-        <div className="absolute inset-0 z-20 flex items-center justify-center text-white mix-blend-exclusion transition-transform duration-300 group-hover:scale-110">
+        <div className="absolute inset-0 z-0 flex items-center justify-center text-white mix-blend-exclusion transition-transform duration-300 group-hover:scale-110">
           <Play className="size-5 sm:size-6 fill-current mr-2" />
           <span className="text-sm font-medium uppercase tracking-tighter">Play</span>
         </div>

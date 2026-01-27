@@ -32,8 +32,8 @@ const HeroSection = () => {
               <Image
                 src='/images/proshow/zeropause/logo.webp'
                 alt='logo'
-                width={350}
-                height={350}
+                width={250}
+                height={250}
               />
             </div>
           </div>
@@ -401,7 +401,7 @@ export default function ScrollGSAPComponent() {
         }
       `}</style>
 
-      <div className="overflow-x-hidden bg-[#001]">
+      <div className="overflow-x-hidden bg-[#000]">
         <HeroSection />
         <section className="relative" ref={workSectionRef} data-work="section">
           <div className="relative">
