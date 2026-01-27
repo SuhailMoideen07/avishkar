@@ -34,26 +34,32 @@ export async function POST(req) {
       eventId,
       name,
       age,
+      email,
       phone,
+      participantType, // college | school
+
+      // college fields
       college,
       participantDepartment,
-      participantType, // college | school
       semester,
+
+      // school fields
+      school,
       schoolClass,
+
       teamMembers = [],
       paymentScreenshot, // base64 image
     } = await req.json();
 
     /* =====================
-       ✅ VALIDATION
+       ✅ BASIC VALIDATION
        ===================== */
     if (
       !eventId ||
       !name ||
       !age ||
+      !email ||
       !phone ||
-      !college ||
-      !participantDepartment ||
       !participantType ||
       !paymentScreenshot
     ) {
@@ -70,18 +76,33 @@ export async function POST(req) {
       );
     }
 
-    if (participantType === "college" && !semester) {
-      return Response.json(
-        { message: "Semester is required for college students" },
-        { status: 400 }
-      );
+    /* =====================
+       🎓 COLLEGE VALIDATION
+       ===================== */
+    if (participantType === "college") {
+      if (!college || !participantDepartment || !semester) {
+        return Response.json(
+          {
+            message:
+              "College, department and semester are required for college students",
+          },
+          { status: 400 }
+        );
+      }
     }
 
-    if (participantType === "school" && !schoolClass) {
-      return Response.json(
-        { message: "Class is required for school students" },
-        { status: 400 }
-      );
+    /* =====================
+       🏫 SCHOOL VALIDATION
+       ===================== */
+    if (participantType === "school") {
+      if (!school || !schoolClass) {
+        return Response.json(
+          {
+            message: "School name and class are required for school students",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     /* =====================
@@ -141,14 +162,22 @@ export async function POST(req) {
       eventId,
       name,
       age,
+      email,
       phone,
-      college,
       participantType,
-      participantDepartment,
+
+      // college fields
+      college: participantType === "college" ? college : null,
+      participantDepartment:
+        participantType === "college" ? participantDepartment : null,
       semester: participantType === "college" ? semester : null,
+
+      // school fields
+      school: participantType === "school" ? school : null,
       schoolClass: participantType === "school" ? schoolClass : null,
+
       teamMembers: event.type === "team" ? teamMembers : [],
-      paymentScreenshot: uploadResult.secure_url, // ✅ URL stored
+      paymentScreenshot: uploadResult.secure_url,
       uniqueCode,
     });
 
@@ -175,9 +204,6 @@ export async function GET() {
   try {
     await connectDB();
 
-    /* =====================
-       🔐 AUTH (CLERK)
-       ===================== */
     const { userId } = auth();
 
     if (!userId) {
@@ -189,9 +215,6 @@ export async function GET() {
       return Response.json({ message: "User does not exist" }, { status: 404 });
     }
 
-    /* =====================
-       📦 FETCH REGISTRATIONS
-       ===================== */
     const registrations = await Registration.find({ userId: user._id })
       .populate({
         path: "eventId",
@@ -199,7 +222,6 @@ export async function GET() {
           title
           description
           imageUrl
-          eventDate
           startTime
           endTime
           eventCategory
@@ -210,42 +232,10 @@ export async function GET() {
       })
       .sort({ createdAt: -1 });
 
-    /* =====================
-       🎯 FORMAT RESPONSE
-       ===================== */
-    const dashboardData = registrations.map((reg) => ({
-      registrationId: reg._id,
-      uniqueCode: reg.uniqueCode, // ✅ REQUIRED
-      registeredAt: reg.createdAt,
-
-      event: {
-        id: reg.eventId?._id,
-        title: reg.eventId?.title,
-        description: reg.eventId?.description,
-        imageUrl: reg.eventId?.imageUrl,
-        eventDate: reg.eventId?.eventDate,
-        startTime: reg.eventId?.startTime,
-        endTime: reg.eventId?.endTime,
-        eventCategory: reg.eventId?.eventCategory,
-        department: reg.eventId?.department,
-        type: reg.eventId?.type,
-        teamSize: reg.eventId?.teamSize,
-      },
-
-      participant: {
-        name: reg.name,
-        college: reg.college,
-        participantDepartment: reg.participantDepartment,
-        participantType: reg.participantType,
-        semester: reg.semester,
-        schoolClass: reg.schoolClass,
-      },
-    }));
-
     return Response.json(
       {
-        count: dashboardData.length,
-        registrations: dashboardData,
+        count: registrations.length,
+        registrations,
       },
       { status: 200 }
     );

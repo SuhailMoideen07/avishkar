@@ -29,8 +29,9 @@ export const metadata = {
 const menuItems = [
   { label: "Home", ariaLabel: "Go to home page", link: "/" },
   { label: "Events", ariaLabel: "View our events", link: "/events" },
-  { label: "Auto Show", ariaLabel: "View our AutoShow", link: "/auto-show" },
-  { label: "Pro Show", ariaLabel: "View our Expo", link: "/pro-show" },
+  { label: "Autoshow", ariaLabel: "View our AutoShow", link: "/auto-show" },
+  { label: "Proshow 1", ariaLabel: "View our Expo", link: "/pro-show/g-live" },
+  { label: "Proshow 2", ariaLabel: "View our Expo", link: "/pro-show/zero-pause" },
   { label: "About", ariaLabel: "Learn about us", link: "/about" },
   { label: "Contact", ariaLabel: "Get in touch", link: "/contact" },
 ];
@@ -47,7 +48,9 @@ export default function RootLayout({ children }) {
         lang="en"
         className={`${geistSans.variable} ${geistMono.variable} ${bangers.variable}`}
       >
+        
         <body className="antialiased">
+          
           <div>
             {/* Menu overlay (unchanged) */}
             <div className="h-[100dvh] fixed inset-0 z-20 pointer-events-none">

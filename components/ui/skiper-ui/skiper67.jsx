@@ -56,7 +56,7 @@ export const Skiper67 = () => {
     <section ref={containerRef} className="relative flex h-screen w-full items-center justify-center  overflow-hidden">
       <div className="absolute top-1/4 flex flex-col items-center gap-6 text-center">
         <span className="relative text-white max-w-[22ch] text-[10px] sm:text-xs uppercase tracking-widest opacity-90 after:absolute after:left-1/2 after:top-full after:h-16 after:w-px after:bg-gradient-to-b after:from-foreground after:to-transparent after:mt-4">
-          Here’s how we did it last year.
+          Here is how we did it last year.
         </span>
       </div>      {/* Video Preview Trigger */}
       <div

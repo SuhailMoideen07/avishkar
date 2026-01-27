@@ -38,3 +38,11 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 git flow completed
 update from sreenath
+API ENDPOINTS
+department-admin-login:api/admin/auth/login/route.js
+department-admin-event-adding:api/admin/events/route.js
+department-admin-event get:api/admin/department/[department]/route.js
+main-admin-login:api/admin/main/login
+main-admin-event-adding:api/admin/main/events/route.js
+event-registartion:api/events/register/route.js
+registration form details api:api/events/form/[eventId]/route.js

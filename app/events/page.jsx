@@ -18,25 +18,44 @@ export default function EventsPage() {
         <div className="w-full px-6 md:px-10 pb-12 md:pb-16 text-center space-y-4">
 
           <Link href="/events/main" className="group mx-auto w-fit block">
-            <div
-              className="
-                relative w-[220px] md:w-[260px] aspect-[3/4]
-                transition-transform duration-300
-                group-hover:-translate-y-2
-              "
-            >
-              <Image
-                src="/events/card1.png"
-                alt="Main Events Card"
-                fill
+            <div className="relative flex items-center justify-center">
+              {/* Peeking Deadpool */}
+              <div
                 className="
-                  object-contain
+                  absolute -top-16 md:-top-20 left-1/2 -translate-x-1/2
+                  w-[120px] md:w-[150px] h-[120px] md:h-[150px]
                   transition-all duration-300
-                  group-hover:scale-105
-                  group-hover:drop-shadow-[0_0_50px_rgba(220,38,38,0.7)]
+                  group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]
+                  z-10
                 "
-                priority
-              />
+              >
+                <Image
+                  src="/events/dead-pool-peek.png"
+                  alt="Deadpool Peeking"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+
+              {/* Main Events Card */}
+              <div
+                className="
+                  relative w-[220px] md:w-[260px] aspect-[3/4]
+                "
+              >
+                <Image
+                  src="/events/card1.png"
+                  alt="Main Events Card"
+                  fill
+                  className="
+                    object-contain
+                    transition-all duration-300
+                    group-hover:drop-shadow-[0_0_50px_rgba(220,38,38,0.7)]
+                  "
+                  priority
+                />
+              </div>
             </div>
           </Link>
 
@@ -74,8 +93,6 @@ export default function EventsPage() {
             <div
               className="
                 relative w-[220px] md:w-[260px] aspect-[3/4]
-                transition-transform duration-300
-                group-hover:-translate-y-2
               "
             >
               <Image
@@ -85,7 +102,6 @@ export default function EventsPage() {
                 className="
                   object-contain
                   transition-all duration-300
-                  group-hover:scale-105
                   group-hover:drop-shadow-[0_0_50px_rgba(220,38,38,0.7)]
                 "
                 priority

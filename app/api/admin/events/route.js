@@ -22,9 +22,10 @@ export async function POST(req) {
       eventCategory,
       type,
       teamSize,
-      paymentUrl,
+      upiId,
+      amount,
+      rules,
       imageBase64,
-      eventDate,
       startTime,
       endTime,
       registrationDeadline,
@@ -35,9 +36,10 @@ export async function POST(req) {
       !title ||
       !eventCategory ||
       !type ||
-      !paymentUrl ||
+      !upiId ||
+      amount === undefined || // check if amount is provided
+      !rules ||
       !imageBase64 ||
-      !eventDate ||
       !startTime ||
       !endTime ||
       !registrationDeadline
@@ -63,9 +65,10 @@ export async function POST(req) {
       department: eventCategory === "department" ? departmentName : null,
       type,
       teamSize: type === "team" ? Number(teamSize || 1) : 1,
-      paymentUrl,
+      upiId,
+      amount,
+      rules,
       imageUrl: uploadResult.secure_url,
-      eventDate: new Date(eventDate),
       startTime: new Date(startTime),
       endTime: new Date(endTime),
       registrationDeadline: new Date(registrationDeadline),
@@ -99,9 +102,10 @@ export async function PUT(req) {
       eventCategory,
       type,
       teamSize,
-      paymentUrl,
+      upiId,
+      amount,
+      rules,
       imageBase64,
-      eventDate,
       startTime,
       endTime,
       registrationDeadline,
@@ -124,8 +128,9 @@ export async function PUT(req) {
     if (eventCategory === "department") event.department = departmentName; // ✅ ensure department from JWT
     if (type) event.type = type;
     if (type === "team" && teamSize) event.teamSize = Number(teamSize);
-    if (paymentUrl) event.paymentUrl = paymentUrl;
-    if (eventDate) event.eventDate = new Date(eventDate);
+    if (upiId) event.upiId = upiId;
+    if (amount !== undefined) event.amount = amount;
+    if (rules) event.rules = rules;
     if (startTime) event.startTime = new Date(startTime);
     if (endTime) event.endTime = new Date(endTime);
     if (registrationDeadline) event.registrationDeadline = new Date(registrationDeadline);
@@ -205,3 +210,30 @@ export async function DELETE(req) {
     return NextResponse.json({ message: error.message || "Server Error" }, { status: 500 });
   }
 }
+export async function GET(req, { params }) {
+  try {
+    await connectDB();
+
+    const { department } = params;
+
+    if (!department) {
+      return NextResponse.json({ message: "Department is required" }, { status: 400 });
+    }
+
+    // Fetch events where department matches OR common events
+    const events = await Event.find({
+      $or: [
+        { department: department },
+        { eventCategory: "common" }
+      ]
+    }).sort({ startTime: 1 });
+
+    return NextResponse.json({ events }, { status: 200 });
+  } catch (error) {
+    console.error("Fetch Department Events Error:", error);
+    return NextResponse.json({ message: error.message || "Server Error" }, { status: 500 });
+  }
+}
+
+
+
