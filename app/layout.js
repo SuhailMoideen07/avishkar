@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import AuthUserButtonWrapper from "@/components/ui/AuthUserButtonWrapper";
 import LenisProvider from "@/components/LenisProvider";
 import { Analytics } from "@vercel/analytics/next"
+import PageTransition from "@/components/PageTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -84,7 +85,9 @@ export default function RootLayout({ children }) {
             </div>
           </div>
           <LenisProvider>
-            {children}
+            <PageTransition>
+          {children}
+        </PageTransition>
           </LenisProvider>
         </body>
       </html>
