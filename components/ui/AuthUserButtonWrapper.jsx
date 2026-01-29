@@ -1,41 +1,31 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 
-export default function AuthUserButtonWrapper() {
-  const pathname = usePathname();
+export default function AuthUserButton() {
+  const [mounted, setMounted] = useState(false);
 
-  if (pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up")) {
-    return null;
-  }
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // ⛔ Prevent server/client mismatch
+  if (!mounted) return null;
 
   return (
-    <div className="flex items-center">
+    <>
       <SignedOut>
-        {/* Text needs slight vertical correction */}
-        <Link
-          href="/sign-in"
-          className="
-            px-4
-            text-sm
-            font-medium
-            text-white
-            leading-none
-            relative
-            top-[3px]
-            sm:top-2
-          "
-        >
-          Sign In
-        </Link>
+        <SignInButton>
+          <button className="text-white text-sm font-medium hover:opacity-80">
+            Sign In
+          </button>
+        </SignInButton>
       </SignedOut>
 
       <SignedIn>
-        {/* Avatar is already vertically centered by Clerk */}
-        <UserButton afterSignOutUrl="/sign-in" />
+        <UserButton afterSignOutUrl="/" />
       </SignedIn>
-    </div>
+    </>
   );
 }
