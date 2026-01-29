@@ -5,41 +5,42 @@ import { NextResponse } from "next/server";
 import { mainAdminAuth } from "@/lib/middleware/mainAdminAuth";
 import mongoose from "mongoose";
 
-/* =====================================================
-   CREATE MAIN EVENT (FILE UPLOAD)
-   ===================================================== */
+// --------------------- CREATE MAIN EVENT ---------------------
 export async function POST(req) {
   try {
     await connectDB();
     mainAdminAuth(req);
 
-    const formData = await req.formData();
+    const body = await req.json();
+    const {
+      title,
+      description,
+      type,
+      teamSize,
+      upiId,
+      amount,
+      rules,
+      imageBase64,
+      startTime,
+      endTime,
+      registrationDeadline,
+    } = body;
 
-    const title = formData.get("title");
-    const description = formData.get("description");
-    const type = formData.get("type");
-    const teamSize = formData.get("teamSize");
-    const upiId = formData.get("upiId");
-    const amount = formData.get("amount");
-    const rules = JSON.parse(formData.get("rules"));
-    const startTime = formData.get("startTime");
-    const endTime = formData.get("endTime");
-    const registrationDeadline = formData.get("registrationDeadline");
-    const image = formData.get("image");
-
+    // 🔒 Required field validation
     if (
       !title ||
       !type ||
       !upiId ||
-      !amount ||
+      amount === undefined ||
       !rules ||
-      !image ||
+      !Array.isArray(rules) ||
+      !imageBase64 ||
       !startTime ||
       !endTime ||
       !registrationDeadline
     ) {
       return NextResponse.json(
-        { message: "Missing required fields" },
+        { message: "All required fields must be provided" },
         { status: 400 }
       );
     }
@@ -53,29 +54,21 @@ export async function POST(req) {
 
     if (type === "team" && (!teamSize || teamSize < 2)) {
       return NextResponse.json(
-        { message: "Team size must be at least 2" },
+        { message: "Team events must have teamSize >= 2" },
         { status: 400 }
       );
     }
 
-    // 🔥 Upload IMAGE FILE to Cloudinary
-    const buffer = Buffer.from(await image.arrayBuffer());
-
-    const uploadResult = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { folder: "main_events" },
-        (err, result) => {
-          if (err) reject(err);
-          else resolve(result);
-        }
-      ).end(buffer);
+    // ☁️ Upload image (Base64)
+    const uploadResult = await cloudinary.uploader.upload(imageBase64, {
+      folder: "main_events",
     });
 
     const event = await Event.create({
       title,
       description,
-      eventCategory: "common",
-      department: null,
+      eventCategory: "common",   // 🔒 fixed for main events
+      department: null,           // 🔒 always null for common events
       type,
       teamSize: type === "team" ? Number(teamSize) : 1,
       upiId,
@@ -88,8 +81,11 @@ export async function POST(req) {
       isActive: true,
     });
 
+    // Remove department from response
+    const { department, ...responseEvent } = event.toObject();
+
     return NextResponse.json(
-      { message: "Main event created successfully", event },
+      { message: "Main event created successfully", event: responseEvent },
       { status: 201 }
     );
   } catch (error) {
@@ -101,18 +97,14 @@ export async function POST(req) {
   }
 }
 
-/* =====================================================
-   UPDATE MAIN EVENT (OPTIONAL FILE UPLOAD)
-   ===================================================== */
+// --------------------- UPDATE MAIN EVENT ---------------------
 export async function PUT(req) {
   try {
     await connectDB();
     mainAdminAuth(req);
 
-    const formData = await req.formData();
-
-    const eventId = formData.get("eventId");
-    const image = formData.get("image");
+    const body = await req.json();
+    const { eventId, imageBase64, ...updates } = body;
 
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
       return NextResponse.json(
@@ -129,48 +121,36 @@ export async function PUT(req) {
       );
     }
 
-    // update normal fields
-    const fields = [
-      "title",
-      "description",
-      "type",
-      "upiId",
-      "amount",
-      "startTime",
-      "endTime",
-      "registrationDeadline",
-      "teamSize",
-    ];
+    // 🔒 Prevent category & department tampering
+    delete updates.eventCategory;
+    delete updates.department;
 
-    fields.forEach((field) => {
-      const value = formData.get(field);
-      if (value !== null) event[field] = value;
-    });
-
-    const rules = formData.get("rules");
-    if (rules) event.rules = JSON.parse(rules);
-
-    // optional image update
-    if (image) {
-      const buffer = Buffer.from(await image.arrayBuffer());
-
-      const uploadResult = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          { folder: "main_events" },
-          (err, result) => {
-            if (err) reject(err);
-            else resolve(result);
-          }
-        ).end(buffer);
-      });
-
-      event.imageUrl = uploadResult.secure_url;
+    // 🧠 Team size logic
+    if (updates.type === "single") {
+      updates.teamSize = 1;
+    }
+    if (updates.type === "team" && updates.teamSize < 2) {
+      return NextResponse.json(
+        { message: "Team size must be at least 2" },
+        { status: 400 }
+      );
     }
 
+    // ☁️ Image update (optional)
+    if (imageBase64) {
+      const uploadResult = await cloudinary.uploader.upload(imageBase64, {
+        folder: "main_events",
+      });
+      updates.imageUrl = uploadResult.secure_url;
+    }
+
+    Object.assign(event, updates);
     await event.save();
 
+    const { department, ...responseEvent } = event.toObject();
+
     return NextResponse.json(
-      { message: "Main event updated successfully", event },
+      { message: "Main event updated successfully", event: responseEvent },
       { status: 200 }
     );
   } catch (error) {
@@ -182,9 +162,7 @@ export async function PUT(req) {
   }
 }
 
-/* =====================================================
-   DELETE MAIN EVENT
-   ===================================================== */
+// --------------------- DELETE MAIN EVENT ---------------------
 export async function DELETE(req) {
   try {
     await connectDB();
@@ -196,6 +174,14 @@ export async function DELETE(req) {
       return NextResponse.json(
         { message: "Invalid eventId" },
         { status: 400 }
+      );
+    }
+
+    const event = await Event.findById(eventId);
+    if (!event || event.eventCategory !== "common") {
+      return NextResponse.json(
+        { message: "Main event not found" },
+        { status: 404 }
       );
     }
 
@@ -214,10 +200,8 @@ export async function DELETE(req) {
   }
 }
 
-/* =====================================================
-   GET ALL MAIN EVENTS (ADMIN)
-   ===================================================== */
-export async function GET() {
+// --------------------- GET ALL MAIN EVENTS ---------------------
+export async function GET(req) {
   try {
     await connectDB();
     mainAdminAuth(req);
@@ -226,7 +210,10 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .lean();
 
-    return NextResponse.json({ events }, { status: 200 });
+    // Remove department from all events
+    const cleanEvents = events.map(({ department, ...rest }) => rest);
+
+    return NextResponse.json({ events: cleanEvents }, { status: 200 });
   } catch (error) {
     console.error("GET MAIN EVENTS ERROR:", error);
     return NextResponse.json(
@@ -236,9 +223,7 @@ export async function GET() {
   }
 }
 
-/* =====================================================
-   ENABLE / DISABLE MAIN EVENT
-   ===================================================== */
+// --------------------- ENABLE / DISABLE MAIN EVENT ---------------------
 export async function PATCH(req) {
   try {
     await connectDB();
@@ -249,6 +234,13 @@ export async function PATCH(req) {
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
       return NextResponse.json(
         { message: "Invalid eventId" },
+        { status: 400 }
+      );
+    }
+
+    if (typeof isActive !== "boolean") {
+      return NextResponse.json(
+        { message: "isActive must be true or false" },
         { status: 400 }
       );
     }
@@ -266,10 +258,12 @@ export async function PATCH(req) {
       );
     }
 
+    const { department, ...responseEvent } = event.toObject();
+
     return NextResponse.json(
       {
         message: `Event ${isActive ? "enabled" : "disabled"} successfully`,
-        event,
+        event: responseEvent,
       },
       { status: 200 }
     );
