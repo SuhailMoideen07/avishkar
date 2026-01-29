@@ -7,7 +7,8 @@ export async function GET(req, { params }) {
   try {
     await connectDB();
 
-    const { eventId } = params;
+    // ✅ FIX: params must be awaited
+    const { eventId } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
       return NextResponse.json(
@@ -17,7 +18,7 @@ export async function GET(req, { params }) {
     }
 
     const event = await Event.findById(eventId).select(
-      "title description rules amount type teamSize"
+      "title description rules amount type teamSize upiId"
     );
 
     if (!event) {
@@ -29,6 +30,7 @@ export async function GET(req, { params }) {
 
     return NextResponse.json({ event }, { status: 200 });
   } catch (error) {
+    console.error("FETCH EVENT FORM ERROR:", error);
     return NextResponse.json(
       { message: "Failed to fetch event details" },
       { status: 500 }
