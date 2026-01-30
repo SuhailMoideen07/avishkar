@@ -38,7 +38,7 @@ const menuItems = [
     ariaLabel: "View our Expo",
     link: "/pro-show/zero-pause",
   },
-  { label: "About", ariaLabel: "Learn about us", link: "/about" },
+  // { label: "About", ariaLabel: "Learn about us", link: "/about" },
   { label: "Contact", ariaLabel: "Get in touch", link: "/contact" },
 ];
 
