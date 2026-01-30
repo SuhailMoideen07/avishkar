@@ -6,8 +6,8 @@ export default function TestRegisterButton() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        eventId: "697b7b114163502e29b26baa",
-        name: "John Pork",
+        eventId: "697c779ecde5cf84ace10564",
+        name: "John Pork auto",
         age: 20,
         email: "john@example.com",
         phone: "9999999999",

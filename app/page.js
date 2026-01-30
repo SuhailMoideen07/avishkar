@@ -1,15 +1,21 @@
 'use client'
 
-import { GridScan } from '@/components/GridScan';
+import dynamic from 'next/dynamic';
 import ScrollMorphComponent from '@/components/HorozontalScroll';
 import { Skiper67 } from '@/components/ui/skiper-ui/skiper67';
 import { pressStart2P } from '@/lib/fonts';
 import Image from 'next/image';
-import { useRef, useEffect, useLayoutEffect } from 'react';
+import { useRef, useEffect, useLayoutEffect, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useRouter } from 'next/navigation';
+
+// Lazy load GridScan with no SSR
+const GridScan = dynamic(() => import('@/components/GridScan').then(mod => ({ default: mod.GridScan })), {
+  ssr: false,
+  loading: () => <div className="fixed inset-0 -z-10 bg-black" />
+});
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -17,6 +23,7 @@ const Page = () => {
   const starsRef = useRef([]);
   const heroRef = useRef(null);
   const router = useRouter();
+  const [showGrid, setShowGrid] = useState(false);
 
   useLayoutEffect(() => {
     // Force scroll to top immediately on mount (before paint)
@@ -29,13 +36,17 @@ const Page = () => {
   useEffect(() => {
     // Additional scroll to top after mount
     window.scrollTo(0, 0);
-    
+
     // Set scroll restoration to manual to prevent Next.js from restoring scroll position
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
 
+    // Delay GridScan rendering until after initial paint
+    const timer = setTimeout(() => setShowGrid(true), 100);
+
     return () => {
+      clearTimeout(timer);
       // Clean up
       if ('scrollRestoration' in window.history) {
         window.history.scrollRestoration = 'auto';
@@ -67,24 +78,26 @@ const Page = () => {
 
       <section className='relative text-[#AD242C] w-full'>
         <div className='fixed inset-0 -z-10 bg-black pointer-events-auto'>
-          <GridScan
-            sensitivity={0.75}
-            lineThickness={1}
-            linesColor="#AD242C"
-            gridScale={0.15}
-            scanColor="#AD242C"
-            scanOpacity={0.5}
-            enablePost={true}
-            enableGyro={true}
-            bloomIntensity={0.6}
-            chromaticAberration={0.002}
-            noiseIntensity={0.01}
-            scanDirection='forward'
-            scanDelay={2}
-            enableWebcam={false}
-            scanGlow={0.25}
+          {showGrid && (
+            <GridScan
+              sensitivity={0.75}
+              lineThickness={1}
+              linesColor="#FF3344"
+              gridScale={0.15}
+              scanColor="#FF3344"
+              scanOpacity={0.5}
+              enablePost={true}  // Keep this on
+              enableGyro={true}
+              bloomIntensity={0}  // Reduced from 0.6
+              chromaticAberration={0}  // Disable this (less GPU intensive)
+              noiseIntensity={0}  // Disable this
+              scanDirection='forward'
+              scanDelay={2}
+              enableWebcam={false}
+              scanGlow={0.25}
             />
-            </div>
+          )}
+        </div>
 
         {/* Hero Section with Stars and Shuffle */}
         <div ref={heroRef} className="relative h-[100lvh] flex justify-center items-center overflow-hidden pointer-events-none">
