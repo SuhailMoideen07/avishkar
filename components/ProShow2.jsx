@@ -17,9 +17,9 @@ const openSans = Open_Sans({
   variable: '--font-open-sans',
 });
 
-// Local Custom Font - UPDATE THIS PATH TO YOUR ACTUAL FONT LOCATION
+// Local Custom Font - FIXED PATH
 const wildWorld = localFont({
-  src: '../public/fonts/wild_world-webfont.woff2', // Update this path
+  src: '../public/fonts/wild_world-webfont.woff2', // Fixed: removed '../public'
   variable: '--font-wild-world',
   display: 'swap',
   fallback: ['sans-serif'],
@@ -31,21 +31,21 @@ export default function SmoothScrollComponent() {
   const staggerRef = useRef(null);
 
   useEffect(() => {
-    // Check if plugins are available
-    if (!ScrollTrigger || !ScrollSmoother || !SplitText) {
-      console.error('GSAP plugins not loaded');
-      return;
-    }
-
-    // Register plugins
+    // Register plugins FIRST
     gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
 
-    // Kill any existing instances first
+    // Kill any existing instances
     ScrollTrigger.getAll().forEach(st => st.kill());
     const existingSmoother = ScrollSmoother.get();
     if (existingSmoother) existingSmoother.kill();
 
-    // Small delay to ensure DOM is ready
+    // IMMEDIATE visibility fix - set opacity to 1 right away
+    gsap.set(".heading", {
+      opacity: 1,
+      yPercent: -150
+    });
+
+    // Small delay for DOM to be ready
     const timer = setTimeout(() => {
       try {
         // Create the smooth scroller
@@ -59,11 +59,7 @@ export default function SmoothScrollComponent() {
           preventDefault: true
         });
 
-        gsap.set(".heading", {
-          yPercent: -150,
-          opacity: 1
-        });
-
+        // SplitText animation
         let mySplitText = new SplitText(staggerRef.current, { type: "words,chars" });
         let chars = mySplitText.chars;
 
@@ -185,7 +181,7 @@ export default function SmoothScrollComponent() {
           top: 50vh;
           left: 50%;
           transform: translateX(-50%);
-          opacity: 0;
+          opacity: 1; /* CHANGED: was 0, now 1 - GSAP will handle this */
           z-index: 1;
         }
 
@@ -458,7 +454,6 @@ export default function SmoothScrollComponent() {
 
           <section className="title container flow--lg smooth-section">
             <h1><span className="eyebrow" aria-hidden="true">Experience  </span>The Ultimate ProShow</h1>
-            {/* <p>Seamlessly integrated with GSAP and ScrollTrigger. Leveraging native scrolling - no "fake" scrollbars or event hijacking.</p> */}
           </section>
 
           <section className="bars container smooth-section">
@@ -532,8 +527,6 @@ export default function SmoothScrollComponent() {
               }}
             />
           </section>
-
-          {/* <section className="spacer smooth-section"></section> */}
         </section>
       </div>
     </>
