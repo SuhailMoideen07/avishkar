@@ -45,6 +45,36 @@ const ThreeDCarousel = () => {
             ],
             radius: 500,
         },
+        {
+            title: 'Accourd',
+            images: [
+                '/images/pistonia/cars/accourd-1.webp',
+                '/images/pistonia/cars/accourd.webp',
+                '/images/pistonia/cars/accourd-2.webp',
+                // '/images/pistonia/cars/accourd-2.webp',
+            ],
+            radius: 300,
+        },
+        {
+            title: 'Sheriff',
+            images: [
+                '/images/pistonia/cars/sheriff-1.webp',
+                '/images/pistonia/cars/sheriff.webp',
+                '/images/pistonia/cars/sheriff-1.webp',
+                '/images/pistonia/cars/sheriff-3.webp',
+            ],
+            radius: 500,
+        },
+        {
+            title: 'Civic',
+            images: [
+                '/images/pistonia/cars/civic-1.webp',
+                '/images/pistonia/cars/civic.webp',
+                '/images/pistonia/cars/civic-2.webp',
+                // '/images/pistonia/cars/civic-2.webp',
+            ],
+            radius: 300,
+        },
     ];
 
     useEffect(() => {

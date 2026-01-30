@@ -83,8 +83,8 @@ const Page = () => {
             scanDelay={2}
             enableWebcam={false}
             scanGlow={0.25}
-          />
-        </div>
+            />
+            </div>
 
         {/* Hero Section with Stars and Shuffle */}
         <div ref={heroRef} className="relative h-[100lvh] flex justify-center items-center overflow-hidden pointer-events-none">
@@ -150,7 +150,7 @@ const Page = () => {
               width={400}
               height={400}
             />
-            <h3 className={`${pressStart2P.className} text-xl drop-shadow-[2px_2px_0px_#000] drop-shadow-[#ffb8bc]`}>2026</h3>
+            <h3 className={`${pressStart2P.className} text-xl drop-shadow-[2px_2px_0px_#000] drop-shadow-[#f87f85] text-center`}>FEB 5,6,7 <br />2026</h3>
           </div>
         </div>
         <ScrollMorphComponent />

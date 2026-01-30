@@ -2,33 +2,27 @@
 
 import { useEffect } from "react";
 import Lenis from "@studio-freight/lenis";
+import { usePathname } from "next/navigation";
 
 export default function LenisProvider({ children }) {
+  const pathname = usePathname();
+
   useEffect(() => {
-    const lenis = new Lenis({
-      smooth: true,
-      lerp: 0.1,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.5,
+    const lenis = new Lenis({ smooth: true });
 
-      wrapper: document.body,
-      content: document.body,
-    });
-
-    let rafId;
-
-    const raf = (time) => {
+    function raf(time) {
       lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    };
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
 
-    rafId = requestAnimationFrame(raf);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      lenis.destroy();
-    };
+    return () => lenis.destroy();
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }, [pathname]);
 
   return children;
 }

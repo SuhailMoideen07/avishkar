@@ -38,7 +38,7 @@ const menuItems = [
     ariaLabel: "View our Expo",
     link: "/pro-show/zero-pause",
   },
-  { label: "About", ariaLabel: "Learn about us", link: "/about" },
+  // { label: "About", ariaLabel: "Learn about us", link: "/about" },
   { label: "Contact", ariaLabel: "Get in touch", link: "/contact" },
 ];
 
@@ -55,6 +55,7 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} ${bangers.variable}`}
       >
         <body className="antialiased">
+          <Analytics />
           {/* Menu overlay */}
           <div className="fixed inset-0 z-20 h-[100dvh] pointer-events-none">
             <StaggeredMenu
@@ -76,11 +77,11 @@ export default function RootLayout({ children }) {
           <div className="fixed top-6 right-32 z-30 flex items-center pointer-events-auto text-white">
             <AuthUserButtonWrapper />
           </div>
-          <LenisProvider>
-            <PageTransition>
-          {children}
-        </PageTransition>
-          </LenisProvider>
+          <PageTransition>
+            <LenisProvider>
+              {children}
+            </LenisProvider>
+          </PageTransition>
         </body>
       </html>
     </ClerkProvider>
