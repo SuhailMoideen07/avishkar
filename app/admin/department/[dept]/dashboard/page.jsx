@@ -98,7 +98,7 @@ export default function DepartmentDashboard() {
           </Link>
 
           <Link
-            href={`/admin/department/${dept}/registrations`}
+            href={`/admin/department/${params.dept}/registrations`}
             className="block px-4 py-2 rounded-lg hover:bg-indigo-600"
           >
             🧾 Registrations
