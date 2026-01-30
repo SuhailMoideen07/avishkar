@@ -1,248 +1,125 @@
 import { connectDB } from "@/lib/db";
-import User from "@/lib/models/User";
-import Event from "@/lib/models/Event";
 import Registration from "@/lib/models/Registration";
+import Event from "@/lib/models/Event";
 import cloudinary from "@/lib/cloudinary";
 import crypto from "crypto";
 import { auth } from "@clerk/nextjs/server";
 
-/* =====================================================
-   REGISTER FOR EVENT
-   ===================================================== */
+async function generateUnique4DigitCode() {
+  let code;
+  let exists = true;
+
+  while (exists) {
+    // Generate 4-digit code (1000–9999)
+    code = Math.floor(1000 + Math.random() * 9000).toString();
+
+    exists = await Registration.exists({ uniqueCode: code });
+  }
+
+  return code;
+}
+
 export async function POST(req) {
   try {
     await connectDB();
 
-    /* =====================
-       🔐 AUTH (CLERK)
-       ===================== */
-    const { userId } = auth();
+    // 🔐 Clerk authentication (MUST be awaited)
+    const { userId } = await auth();
+    console.log("AUTH USER ID:", userId);
 
     if (!userId) {
-      return Response.json({ message: "Unauthorized" }, { status: 401 });
+      return Response.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    const user = await User.findOne({ clerkUserId: userId });
-    if (!user) {
-      return Response.json({ message: "User does not exist" }, { status: 404 });
-    }
+    const body = await req.json();
 
-    /* =====================
-       📥 REQUEST BODY
-       ===================== */
     const {
       eventId,
       name,
       age,
       email,
       phone,
-      participantType, // college | school
-
-      // college fields
+      participantType,
       college,
       participantDepartment,
       semester,
-
-      // school fields
       school,
       schoolClass,
-
       teamMembers = [],
-      paymentScreenshot, // base64 image
-    } = await req.json();
+      paymentScreenshot,
+    } = body;
 
-    /* =====================
-       ✅ BASIC VALIDATION
-       ===================== */
+    // Basic validation
     if (
       !eventId ||
       !name ||
-      !age ||
       !email ||
       !phone ||
       !participantType ||
       !paymentScreenshot
     ) {
       return Response.json(
-        { message: "Missing required fields" },
+        { message: "Missing fields" },
         { status: 400 }
       );
     }
 
-    if (!["college", "school"].includes(participantType)) {
-      return Response.json(
-        { message: "Invalid participant type" },
-        { status: 400 }
-      );
-    }
-
-    /* =====================
-       🎓 COLLEGE VALIDATION
-       ===================== */
-    if (participantType === "college") {
-      if (!college || !participantDepartment || !semester) {
-        return Response.json(
-          {
-            message:
-              "College, department and semester are required for college students",
-          },
-          { status: 400 }
-        );
-      }
-    }
-
-    /* =====================
-       🏫 SCHOOL VALIDATION
-       ===================== */
-    if (participantType === "school") {
-      if (!school || !schoolClass) {
-        return Response.json(
-          {
-            message: "School name and class are required for school students",
-          },
-          { status: 400 }
-        );
-      }
-    }
-
-    /* =====================
-       🎯 EVENT CHECK
-       ===================== */
+    // Check event
     const event = await Event.findById(eventId);
-    if (!event || !event.isActive) {
+    if (!event) {
       return Response.json(
-        { message: "Event not available" },
+        { message: "Event not found" },
         { status: 404 }
       );
     }
 
-    if (event.type === "team" && teamMembers.length !== event.teamSize) {
+    // Prevent duplicate registration
+    const exists = await Registration.findOne({ userId, eventId });
+    if (exists) {
       return Response.json(
-        { message: `Team size must be ${event.teamSize}` },
-        { status: 400 }
-      );
-    }
-
-    /* =====================
-       ❌ DUPLICATE CHECK
-       ===================== */
-    const alreadyRegistered = await Registration.findOne({
-      userId: user._id,
-      eventId,
-    });
-
-    if (alreadyRegistered) {
-      return Response.json(
-        { message: "You already registered for this event" },
+        { message: "Already registered" },
         { status: 409 }
       );
     }
 
-    /* =====================
-       🖼️ UPLOAD PAYMENT IMAGE
-       ===================== */
-    const uploadResult = await cloudinary.uploader.upload(
-      paymentScreenshot,
-      {
-        folder: "payment_screenshots",
-        resource_type: "image",
-      }
-    );
+    // Upload payment screenshot
+    const upload = await cloudinary.uploader.upload(paymentScreenshot, {
+      folder: "event_payments",
+    });
 
-    /* =====================
-       🆔 UNIQUE CODE
-       ===================== */
-    const uniqueCode = crypto.randomUUID();
+    const uniqueCode = await generateUnique4DigitCode();
 
-    /* =====================
-       📝 SAVE REGISTRATION
-       ===================== */
+    // Save registration
     const registration = await Registration.create({
-      userId: user._id,
+      userId,
       eventId,
       name,
       age,
       email,
       phone,
       participantType,
-
-      // college fields
       college: participantType === "college" ? college : null,
       participantDepartment:
         participantType === "college" ? participantDepartment : null,
       semester: participantType === "college" ? semester : null,
-
-      // school fields
       school: participantType === "school" ? school : null,
       schoolClass: participantType === "school" ? schoolClass : null,
-
-      teamMembers: event.type === "team" ? teamMembers : [],
-      paymentScreenshot: uploadResult.secure_url,
+      teamMembers,
+      paymentScreenshot: upload.secure_url,
       uniqueCode,
     });
 
     return Response.json(
-      {
-        message: "Event registered successfully",
-        registration,
-      },
+      { message: "Registered successfully", registration },
       { status: 201 }
     );
-  } catch (error) {
-    console.error("Registration Error:", error);
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
     return Response.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-}
-
-/* =====================================================
-   GET USER REGISTRATIONS
-   ===================================================== */
-export async function GET() {
-  try {
-    await connectDB();
-
-    const { userId } = auth();
-
-    if (!userId) {
-      return Response.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = await User.findOne({ clerkUserId: userId });
-    if (!user) {
-      return Response.json({ message: "User does not exist" }, { status: 404 });
-    }
-
-    const registrations = await Registration.find({ userId: user._id })
-      .populate({
-        path: "eventId",
-        select: `
-          title
-          description
-          imageUrl
-          startTime
-          endTime
-          eventCategory
-          department
-          type
-          teamSize
-        `,
-      })
-      .sort({ createdAt: -1 });
-
-    return Response.json(
-      {
-        count: registrations.length,
-        registrations,
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Fetch Registrations Error:", error);
-    return Response.json(
-      { message: "Internal Server Error" },
+      { message: "Server error" },
       { status: 500 }
     );
   }

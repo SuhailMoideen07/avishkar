@@ -131,18 +131,17 @@ const EmergeMaterial = shaderMaterial(
 
       vec3 finalColor = mix(fillColor,defaultColor.rgb,final);
       gl_FragColor = vec4(finalColor,1.);
-    //   gl_FragColor.rgb = pow(gl_FragColor.rgb,vec3(1./2.2));
     }
   `
 );
 
 extend({ EmergeMaterial });
 
-// Hook for screen size
+// Hook for screen size - Fixed to avoid hydration issues
 const useScreenSize = () => {
     const [screenSize, setScreenSize] = useState({
-        width: typeof window !== 'undefined' ? window.innerWidth : 1920,
-        height: typeof window !== 'undefined' ? window.innerHeight : 1080,
+        width: undefined,
+        height: undefined,
     });
 
     useEffect(() => {
@@ -152,6 +151,10 @@ const useScreenSize = () => {
                 height: window.innerHeight,
             });
         };
+
+        // Set initial size on mount
+        handleResize();
+
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -242,7 +245,7 @@ function EmergingImage({ url, className, onMount }) {
                 { threshold: 0.1 }
             );
             observer.observe(containerRef.current);
-            
+
             // Check if element is already intersecting on mount
             const rect = containerRef.current.getBoundingClientRect();
             const isVisible = (
@@ -254,7 +257,7 @@ function EmergingImage({ url, className, onMount }) {
             if (isVisible) {
                 setIsIntersecting(true);
             }
-            
+
             return () => observer.disconnect();
         }
     }, []);
@@ -279,49 +282,68 @@ const images = [
     { url: "/images/mainpage/g-live.webp", title: "Proshow", year: "जी-LIVE", path: "/pro-show/g-live", r: 5, c: 4, s: 3 },
     { url: "/images/mainpage/zeropause.webp", title: "Proshow", year: "ZEROPAUSE", path: "/pro-show/zero-pause", r: 7, c: 3, s: 4 },
     { url: "/images/mainpage/events.webp", title: "", year: "Cultural & Technical Events", path: "/events", r: 8, c: 5, s: 3 },
-    // { url: "/images/mainpage/", title: "", year: "Technical Events", path: "/events/dept", r: 9, c: 1, s: 5 },
 ];
 
 // Main App Component
 export default function HorizontalScroll() {
     const [imageDataList, setImageDataList] = useState([]);
+    const [isMounted, setIsMounted] = useState(false);
     const screenSize = useScreenSize();
 
-    const handleImageMount = (index, data) => {
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    const handleImageMount = React.useCallback((index, data) => {
         setImageDataList(prev => {
             const newList = [...prev];
             newList[index] = data;
             return newList;
         });
+    }, []);
+
+    // Function to get grid styles - only applies on client after mount
+    const getGridStyles = (img) => {
+        if (!isMounted || screenSize.width === undefined) {
+            return {};
+        }
+
+        if (screenSize.width >= 768) {
+            return {
+                gridColumn: `${img.c} / span ${img.s || 1}`,
+                gridRow: img.r,
+            };
+        }
+
+        return {};
     };
 
     return (
-        <div >
+        <div>
             <style jsx global>{`
-        
-        * {
-          box-sizing: border-box;
-        }
-        
-        body {
-          margin: 0;
-          background-color: #101014;
-          color: #f0f0f0;
-          font-weight: 600;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          overflow-x: hidden;
-        }
-        
-        a {
-          color: #818798;
-          text-decoration: none;
-        }
-        
-        a:hover {
-          color: #fff;
-        }
-      `}</style>
+                * {
+                    box-sizing: border-box;
+                }
+
+                body {
+                    margin: 0;
+                    background-color: #101014;
+                    color: #f0f0f0;
+                    font-weight: 600;
+                    -webkit-font-smoothing: antialiased;
+                    -moz-osx-font-smoothing: grayscale;
+                    overflow-x: hidden;
+                }
+
+                a {
+                    color: #818798;
+                    text-decoration: none;
+                }
+
+                a:hover {
+                    color: #fff;
+                }
+            `}</style>
 
             <Canvas
                 style={{
@@ -340,26 +362,26 @@ export default function HorizontalScroll() {
 
             <main className="relative w-full">
                 <div className="relative px-12 py-8 grid w-full min-h-[20vh]">
-                    <h1 className="text-5xl md:text-7xl lg:text-7xl font-black leading-tight deadpool-heading" >
+                    <h1 className="text-5xl md:text-7xl lg:text-7xl font-black leading-tight deadpool-heading">
                         THE ATTRACTIONS
                     </h1>
                 </div>
 
-                <div className="w-full relative my-[10vh] mb-[10vh] px-12 grid gap-12 md:gap-[3vw] md:grid-cols-10 md:auto-rows-auto deadpool-heading  ">
+                <div className="w-full relative my-[10vh] mb-[10vh] px-12 grid gap-12 md:gap-[3vw] md:grid-cols-10 md:auto-rows-auto deadpool-heading">
                     {images.map((img, idx) => (
                         <figure
                             key={idx}
                             className="relative m-0 mb-9"
-                            style={{
-                                gridColumn: screenSize.width >= 768 ? `${img.c} / span ${img.s || 1}` : 'auto',
-                                gridRow: screenSize.width >= 768 ? img.r : 'auto',
-                            }}
+                            style={getGridStyles(img)}
                         >
                             <h3 className="font-bold text-xl m-0">
                                 {img.title}
                             </h3>
-                            <Link href={img.path} className='hover:'>
-                                <div className="relative overflow-hidden grid place-items-center w-full h-auto" style={{ aspectRatio: '0.7' }}>
+                            <Link href={img.path}>
+                                <div 
+                                    className="relative overflow-hidden grid place-items-center w-full h-auto" 
+                                    style={{ aspectRatio: '0.7' }}
+                                >
                                     <EmergingImage
                                         url={img.url}
                                         className="w-full h-full bg-cover bg-center relative"
@@ -367,10 +389,10 @@ export default function HorizontalScroll() {
                                     />
                                 </div>
                                 <figcaption className="absolute p-2 flex flex-wrap gap-2">
-                                    <h3 className="font-bold text-xl m-0 text-[#ef4444]" >
+                                    <h3 className="font-bold text-xl m-0 text-[#ef4444]">
                                         {img.year}
                                     </h3>
-                                    <h3 className="font-bold text-base m-0 underline text-[#b9b3af] hover:text-[#afb1b9]"  >
+                                    <h3 className="font-bold text-base m-0 underline text-[#b9b3af] hover:text-[#afb1b9]">
                                         See Details
                                     </h3>
                                 </figcaption>

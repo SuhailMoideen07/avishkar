@@ -33,8 +33,12 @@ const menuItems = [
   { label: "Events", ariaLabel: "View our events", link: "/events" },
   { label: "Autoshow", ariaLabel: "View our AutoShow", link: "/auto-show" },
   { label: "Proshow 1", ariaLabel: "View our Expo", link: "/pro-show/g-live" },
-  { label: "Proshow 2", ariaLabel: "View our Expo", link: "/pro-show/zero-pause" },
-  // { label: "About", ariaLabel: "Learn about us", link: "/about" },
+  {
+    label: "Proshow 2",
+    ariaLabel: "View our Expo",
+    link: "/pro-show/zero-pause",
+  },
+  { label: "About", ariaLabel: "Learn about us", link: "/about" },
   { label: "Contact", ariaLabel: "Get in touch", link: "/contact" },
 ];
 
@@ -45,50 +49,39 @@ const socialItems = [
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
       <html
         lang="en"
         className={`${geistSans.variable} ${geistMono.variable} ${bangers.variable}`}
       >
-        
         <body className="antialiased">
-          <Analytics/>
-          <div>
-            {/* Menu overlay (unchanged) */}
-            <div className="h-[100dvh] fixed inset-0 z-20 pointer-events-none">
-              <StaggeredMenu
-                position="right"
-                items={menuItems}
-                socialItems={socialItems}
-                displaySocials={true}
-                displayItemNumbering={true}
-                menuButtonColor="#fff"
-                openMenuButtonColor="#000000"
-                changeMenuColorOnOpen={true}
-                colors={["#FF7A7B", "#AD242C"]}
-                logoUrl="/images/logo.PNG"
-                accentColor="#AD242C"
-              />
-            </div>
-
-            <div
-              className="
-    fixed
-    top-7 sm:top-6
-    right-28 sm:right-32
-    z-30
-    pointer-events-auto
-    flex items-center
-  "
-            >
-              <AuthUserButtonWrapper />
-            </div>
+          <Analytics />
+          {/* Menu overlay */}
+          <div className="fixed inset-0 z-20 h-[100dvh] pointer-events-none">
+            <StaggeredMenu
+              position="right"
+              items={menuItems}
+              socialItems={socialItems}
+              displaySocials
+              displayItemNumbering
+              menuButtonColor="#fff"
+              openMenuButtonColor="#000000"
+              changeMenuColorOnOpen
+              colors={["#FF7A7B", "#AD242C"]}
+              logoUrl="/images/logo.PNG"
+              accentColor="#AD242C"
+            />
           </div>
-          <LenisProvider>
-            <PageTransition>
-          {children}
-        </PageTransition>
-          </LenisProvider>
+
+          {/* Auth button – aligned with menu */}
+          <div className="fixed top-6 right-32 z-30 flex items-center pointer-events-auto text-white">
+            <AuthUserButtonWrapper />
+          </div>
+          <PageTransition>
+            <LenisProvider>
+              {children}
+            </LenisProvider>
+          </PageTransition>
         </body>
       </html>
     </ClerkProvider>

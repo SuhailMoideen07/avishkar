@@ -1,11 +1,10 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 
-export default clerkMiddleware({
-  publicRoutes: [
-    "/api/webhooks/clerk", // 👈 REQUIRED
-  ],
-});
+export default clerkMiddleware();
 
 export const config = {
-  matcher: ["/((?!_next|.*\\..*).*)"],
+  matcher: [
+    // Run on all routes except static files
+    "/((?!_next|.*\\..*).*)",
+  ],
 };
