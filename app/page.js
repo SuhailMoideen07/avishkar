@@ -77,7 +77,7 @@ const Page = () => {
     <>
 
       <section className='relative text-[#AD242C] w-full'>
-        <div className='fixed inset-0 -z-10 bg-black pointer-events-auto'>
+        <div className='fixed inset-0 -z-10 bg-[#141313] pointer-events-auto'>
           {showGrid && (
             <GridScan
               sensitivity={0.75}
